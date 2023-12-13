@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using EgeBot.Bot;
 
 namespace EgeBot
 {
@@ -22,7 +23,7 @@ namespace EgeBot
             var tokenString = config.GetConnectionString("BotToken");
 
             //builder.Services.AddDbContext<BotDbContext>(options => options.UseNpgsql(connectionString));
-            var bot = new Bot(tokenString);
+            var bot = new Bot.Bot(tokenString);
             bot.Run();
             
             using IHost host = builder.Build();

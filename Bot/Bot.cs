@@ -6,8 +6,10 @@ using Telegram.Bot.Types.Enums;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO;
+using System.Linq;
 
-namespace EgeBot
+namespace EgeBot.Bot
 {
     public class Bot
     {
@@ -46,21 +48,31 @@ namespace EgeBot
         
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
+           
+
+            /* var heh = update;
+            var file = botClient.GetFileAsync(heh.Message.Document.FileId);
+            var fileName = update.Message.Document.FileName;
+            using (var saveImageStream = System.IO.File.Open(fileName, FileMode.Create))
+            {
+                await botClient.DownloadFileAsync(file.Result.FilePath, saveImageStream);
+            } //File downloading stuff
+            */
+
             // Only process Message updates: https://core.telegram.org/bots/api#message
             if (update.Message is not { } message)
-                return;
-            // Only process text messages
-            if (message.Text is not { } messageText)
                 return;
 
             var chatId = message.Chat.Id;
 
-            Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
+            Console.WriteLine($"Received message in chat {chatId}.");
+
+            Response response = MessageHandler.HandleUpdate(update);
 
             // Echo received message text
             Message sentMessage = await botClient.SendTextMessageAsync(
                 chatId: chatId,
-                text: "You said:\n" + messageText,
+                text: response.Answer,
                 cancellationToken: cancellationToken);
         }
 
