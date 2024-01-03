@@ -19,14 +19,14 @@ namespace EgeBot.Bot
         {
             this.token = token;
         }
-        
+
         public async void Run()
         {
             var botClient = new TelegramBotClient(this.token);
-            
-            using CancellationTokenSource cts = new ();
+
+            using CancellationTokenSource cts = new();
             // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
-            ReceiverOptions receiverOptions = new ()
+            ReceiverOptions receiverOptions = new()
             {
                 AllowedUpdates = Array.Empty<UpdateType>() // receive all update types except ChatMember related updates
             };
@@ -45,19 +45,9 @@ namespace EgeBot.Bot
             // Send cancellation request to stop bot
             cts.Cancel();
         }
-        
+
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-           
-
-            /* var heh = update;
-            var file = botClient.GetFileAsync(heh.Message.Document.FileId);
-            var fileName = update.Message.Document.FileName;
-            using (var saveImageStream = System.IO.File.Open(fileName, FileMode.Create))
-            {
-                await botClient.DownloadFileAsync(file.Result.FilePath, saveImageStream);
-            } //File downloading stuff
-            */
 
             // Only process Message updates: https://core.telegram.org/bots/api#message
             if (update.Message is not { } message)
@@ -88,5 +78,5 @@ namespace EgeBot.Bot
             Console.WriteLine(ErrorMessage);
             return Task.CompletedTask;
         }
-    }    
+    }
 }
