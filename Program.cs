@@ -22,8 +22,13 @@ namespace EgeBot
             var connectionString = config.GetConnectionString("DefaultConnection");
             var tokenString = config.GetConnectionString("BotToken");
 
+            var keyID = config.GetConnectionString("KeyID");
+            var SecretKey = config.GetConnectionString("SecretKey");
+            var endpointURL = config.GetConnectionString("EndpointURL");
+            var storage = new s3Storage(keyID, SecretKey, endpointURL);
+
             //builder.Services.AddDbContext<BotDbContext>(options => options.UseNpgsql(connectionString));
-            var bot = new Bot.Bot(tokenString);
+            var bot = new Bot.Bot(tokenString, storage);
             bot.Run();
             
             using IHost host = builder.Build();
