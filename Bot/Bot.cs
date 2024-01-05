@@ -8,6 +8,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 using System.Linq;
+using Telegram.Bot.Types.ReplyMarkups;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Linq.Expressions;
+using static System.Net.Mime.MediaTypeNames;
+using EgeBot.Bot.Services.Scenarios;
 
 namespace EgeBot.Bot
 {
@@ -15,11 +21,13 @@ namespace EgeBot.Bot
     {
         private string token;
         private s3Storage Storage { get; }
+        private MessageHandler MessageHandler { get; }
 
         public Bot(string token, s3Storage storage)
         {
             this.token = token;
             Storage = storage;
+            MessageHandler = new MessageHandler();
         }
 
         public async void Run()
@@ -72,12 +80,15 @@ namespace EgeBot.Bot
 
             Console.WriteLine($"Received message in chat {chatId}.");
 
-            Response response = MessageHandler.HandleUpdate(update);
+            Response response = await MessageHandler.HandleUpdate(update);
+
+            var replyKeyboardMarkup = response.Payload.load == null ? null : (ReplyKeyboardMarkup)response.Payload.load;
 
             // Echo received message text
             Message sentMessage = await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: response.Answer,
+                replyMarkup: replyKeyboardMarkup == null ? new ReplyKeyboardRemove() : replyKeyboardMarkup,
                 cancellationToken: cancellationToken);
         }
 
