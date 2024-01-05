@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Linq.Expressions;
 using static System.Net.Mime.MediaTypeNames;
 using EgeBot.Bot.Services.Scenarios;
+using EgeBot.Bot.Models.db;
 
 namespace EgeBot.Bot
 {
@@ -24,11 +25,11 @@ namespace EgeBot.Bot
         private MessageHandler MessageHandler { get; }
         private UpdateType[] validTypes = new UpdateType[] { UpdateType.Message, UpdateType.CallbackQuery };
 
-        public Bot(string token, s3Storage storage)
+        public Bot(string token, s3Storage storage, BotDbContext connectionDbString)
         {
             this.token = token;
             Storage = storage;
-            MessageHandler = new MessageHandler();
+            MessageHandler = new MessageHandler(connectionDbString);
         }
 
         public async void Run()
