@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EgeBot.Bot.Services.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,14 +11,6 @@ namespace EgeBot.Bot.Services.Scenarios
 {
     public class ScenarioHandler
     {
-        private ReplyKeyboardMarkup ReplyKeyboardWrapper(string[] answers)
-        {
-            var keyboardButtons = answers.Select(x => new KeyboardButton(x));
-            return new ReplyKeyboardMarkup(keyboardButtons)
-            {
-                ResizeKeyboard = true
-            };
-        }
         /// <summary>
         /// Am I supposed to say that this thing basically meows?
         /// </summary>
@@ -25,10 +18,10 @@ namespace EgeBot.Bot.Services.Scenarios
         /// <param name="chatId"></param>
         /// <returns>Response with meow.</returns>
         [MessageHandler("мяу")]
+        [ButtonResponse("мяу", "Вопрос")]
         public async Task<Response> CatReturner(string text, long chatId)
         {
-            return new Response("MEOOOOOOOOOOOOOOOOOOOOOOOOOOOOW", chatId,
-                new Payload(ReplyKeyboardWrapper(new[] { "/cat", "/question" })));
+            return new Response("MEOOOOOOOOOOOOOOOOOOOOOOOOOOOOW", chatId);
         }
 
         /// <summary>
