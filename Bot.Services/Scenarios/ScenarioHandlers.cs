@@ -1,3 +1,5 @@
+using EgeBot.Bot.Services.Attributes;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +9,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 
 namespace EgeBot.Bot.Services.Scenarios
@@ -16,13 +19,9 @@ namespace EgeBot.Bot.Services.Scenarios
     /// </summary>
     public partial class MessageHandler
     {
-        //private static Dictionary<string, Func<string, long, Task<Response>>> CommandDictionary =
-        //    new Dictionary<string, Func<string, long, Task<Response>>>
-        //    {
-
-        //    };
-
         private static Dictionary<string, MethodInfo> commands = new Dictionary<string, MethodInfo> { };
+
+        private static Dictionary<MethodInfo, string?[]> buttonResponses = new Dictionary<MethodInfo, string?[]> { };
 
         private ScenarioHandler ScenarioHandler { get; }
 
@@ -30,21 +29,21 @@ namespace EgeBot.Bot.Services.Scenarios
         public MessageHandler()
         {
             ScenarioHandler = new ScenarioHandler();
-            InitializeCommandWheel(FindAllMethodsWithAttribute());
+            InitializeCommandWheel(FindAllMethodsWithAttribute(typeof(MessageHandlerAttribute)));
+            InitializeButtonsResponse();
         }
-        private IEnumerable<MethodInfo> FindAllMethodsWithAttribute()
+
+        private IEnumerable<MethodInfo> FindAllMethodsWithAttribute(Type attribute)
         {
             var methods = ScenarioHandler.GetType()
                 .GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .Where(m => m.GetCustomAttributes(typeof(MessageHandlerAttribute), false).Length > 0)
+                .Where(m => m.GetCustomAttributes(attribute, false).Length > 0)
                 .ToArray();
             return methods;
         }
 
         private void InitializeCommandWheel(IEnumerable<MethodInfo> methods)
         {
-            var xRef = Expression.Constant(ScenarioHandler);
-
             foreach (var method in methods)
             {
                 var myCommand = (MessageHandlerAttribute)method.GetCustomAttribute(typeof(MessageHandlerAttribute));
@@ -55,15 +54,32 @@ namespace EgeBot.Bot.Services.Scenarios
             return;
         }
 
-        public static Delegate CreateDelegate1(MethodInfo methodInfo, object target)
+        private void InitializeButtonsResponse()
         {
-            var parmTypes = methodInfo.GetParameters().Select(parm => parm.ParameterType);
-            var parmAndReturnTypes = parmTypes.Append(methodInfo.ReturnType).ToArray();
-            var delegateType = Expression.GetDelegateType(parmAndReturnTypes);
+            var methods = ScenarioHandler.GetType()
+                .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
-            if (methodInfo.IsStatic)
-                return methodInfo.CreateDelegate(delegateType);
-            return methodInfo.CreateDelegate(delegateType, target);
+            foreach (var method in methods)
+            {
+                var myCommand = (ButtonResponseAttribute)method.GetCustomAttribute(typeof(ButtonResponseAttribute));
+                if (myCommand == null)
+                    buttonResponses.Add(method, null);
+                else
+                    buttonResponses.Add(method, myCommand.Buttons);
+            }
+            return;
+        }
+
+        private ReplyKeyboardMarkup ReplyKeyboardWrapper(string[] answers)
+        {
+            if(answers == null)
+                return null;
+
+            var keyboardButtons = answers.Select(x => new KeyboardButton(x));
+            return new ReplyKeyboardMarkup(keyboardButtons)
+            {
+                ResizeKeyboard = true
+            };
         }
 
         public async Task<Response> HandleUpdate(Update update)
@@ -100,14 +116,21 @@ namespace EgeBot.Bot.Services.Scenarios
             if (!commands.ContainsKey(cmdArgs[0]))
                 return await ErrorHandler(chatID, ErrorCodes.InvalidOperation);
 
+            Response? responsePayload = null;
+           
+
             if (cmdArgs.Length == 1)
             {
                 var parameters = new object[] { "", chatID };
-                return await (Task<Response>)commands[cmdArgs[0]].Invoke(ScenarioHandler, parameters);
+                responsePayload = await (Task<Response>)commands[cmdArgs[0]].Invoke(ScenarioHandler, parameters);
+                responsePayload.Payload = new Payload(ReplyKeyboardWrapper(buttonResponses[commands[cmdArgs[0]]]));
+                return responsePayload;
             }
 
             var fullparams = new object[] { cmdArgs[1], chatID };
-            return await (Task<Response>)commands[cmdArgs[0]].Invoke(cmdArgs[1], fullparams);
+            responsePayload = await (Task<Response>)commands[cmdArgs[0]].Invoke(cmdArgs[1], fullparams);
+            responsePayload.Payload = new Payload(ReplyKeyboardWrapper(buttonResponses[commands[cmdArgs[0]]]));
+            return responsePayload;
         }
 
         private static async Task<Response> ErrorHandler(long ChatId, ErrorCodes code)
