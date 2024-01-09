@@ -25,7 +25,7 @@ namespace EgeBot.Bot.Services.Scenarios
         private readonly DBService dbService;
         public ScenarioHandler(BotDbContext connectionDbString)
         {
-            dbService = new DBService(connectionDbString);  
+            dbService = new DBService(connectionDbString);
         }
 
         private string GetAllTaskKim()
@@ -42,14 +42,14 @@ namespace EgeBot.Bot.Services.Scenarios
         }
 
         [MessageHandler("/help")]
-        [ButtonResponse("Выбрать номер", "Выбрать тему", "Выбрать сложность", "Теория", "Тренеровка", "Выбрать имя","Статистика")]
+        [ButtonResponse(typeof(ReplyKeyboard),"Выбрать номер", "Выбрать тему", "Выбрать сложность", "Теория", "Тренеровка", "Выбрать имя", "Статистика")]
         public async Task<Response> Help(string text, long chatId)
         {
             return new Response("ᕦ(ò_óˇ)ᕤ", chatId);
         }
 
         [MessageHandler("Выбрать сложность")]
-        [ButtonResponse("easy","medium","hard")]
+        [ButtonResponse(typeof(CallbackButton),"easy", "medium", "hard")]
         public async Task<Response> SetSettingComplexity(string text, long chatId)
         {
             //var a = Enum.GetNames(typeof(Complexity));
@@ -57,7 +57,7 @@ namespace EgeBot.Bot.Services.Scenarios
         }
 
         [MessageHandler("Выбрать номер")]
-        [ButtonResponse("easy", "medium", "hard")]
+        [ButtonResponse(typeof(CallbackButton),"easy", "medium", "hard")]
         public async Task<Response> SetSettingTaskKim(string text, long chatId)
         {
             //var a = Enum.GetNames(typeof(Complexity));
@@ -67,10 +67,10 @@ namespace EgeBot.Bot.Services.Scenarios
 
 
         [MessageHandler("мяу")]
-        [ButtonResponse(typeof(CallbackButton),"мяу", "Вопрос")]
-        public async Task<Response> CatReturner(string text, long chatId
+        [ButtonResponse(typeof(CallbackButton), "мяу", "Вопрос")]
+        public async Task<Response> CatReturner(string text, long chatId)
         {
-			return new Response("MEOOOOOOOOOOOOOOOOOOOOOOOOOOOOW", chatId);
+            return new Response("MEOOOOOOOOOOOOOOOOOOOOOOOOOOOOW", chatId);
         }
 
         /// <summary>
@@ -81,9 +81,9 @@ namespace EgeBot.Bot.Services.Scenarios
         /// <returns>Response with question</returns>
 
         [MessageHandler("Вопрос")]
-        public Task<Response> Questioner(string text, long chatId)
+        public async Task<Response> Questioner(string text, long chatId)
         {
-            return Task.FromResult(new Response("What is the meaning of life?", chatId));
+            return new Response("What is the meaning of life?", chatId);
         }
         /// <summary>
         /// Sets category of tasks. Supposed to work with persistent data
@@ -93,9 +93,9 @@ namespace EgeBot.Bot.Services.Scenarios
         /// <returns></returns>
 
         [MessageHandler("Выбрать_Категорию")]
-        public Task<Response> SetCategory(string text, long chatId)
+        public async Task<Response> SetCategory(string text, long chatId)
         {
-            return Task.FromResult(new Response("What is the meaning of life?", chatId));
+            return new Response("What is the meaning of life?", chatId);
         }
         /// <summary>
         /// Handles input for answer. Supposed to work with persistent data
@@ -105,14 +105,15 @@ namespace EgeBot.Bot.Services.Scenarios
         /// <returns></returns>
 
         [MessageHandler("Ответ")]
-        public Task<Response> Answer(string text, long chatId)
+        public async Task<Response> Answer(string text, long chatId)
         {
-            return Task.FromResult(new Response(string.Format("Вы ответили: {0}", text), chatId));
+            return new Response(string.Format("Вы ответили: {0}", text), chatId);
         }
 
         [MessageHandler("Статистика")]
-        public Task<Response> GetStats(string text, long chatId)
+        public async Task<Response> GetStats(string text, long chatId)
         {
-            return Task.FromResult(new Response("Вот статистика по заданиям: (Not implemented yet)", chatId));
-        }    }
+            return new Response("Вот статистика по заданиям: (Not implemented yet)", chatId);
+        }
+    }
 }

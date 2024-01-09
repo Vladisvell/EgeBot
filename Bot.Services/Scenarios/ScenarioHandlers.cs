@@ -1,4 +1,5 @@
 using Amazon.Runtime.Internal.Transform;
+using EgeBot.Bot.Models.db;
 using EgeBot.Bot.Services.Attributes;
 using EgeBot.Bot.Services.Interfaces;
 using Microsoft.VisualBasic;
@@ -30,9 +31,9 @@ namespace EgeBot.Bot.Services.Scenarios
         private ScenarioHandler ScenarioHandler { get; }
 
 
-        public MessageHandler()
+        public MessageHandler(BotDbContext connectionDbString)
         {
-            ScenarioHandler = new ScenarioHandler();
+            ScenarioHandler = new ScenarioHandler(connectionDbString);
             InitializeCommandWheel(FindAllMethodsWithAttribute(typeof(MessageHandlerAttribute)));
             InitializeButtonsResponse();
         }
