@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace EgeBot.Bot.Services.Attributes
 {
+    [AttributeUsage(AttributeTargets.Method)]
     public class ButtonResponseAttribute : Attribute
     {
         public IButtonResponse ButtonResponse;

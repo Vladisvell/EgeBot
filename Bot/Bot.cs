@@ -114,15 +114,13 @@ namespace EgeBot.Bot
 
             Console.WriteLine($"Received message in chat {chatId}.");
 
-            Response response = await MessageHandler.HandleUpdate(update);
-
-            var replyMarkup = (IReplyMarkup)response.Payload.Markup;
+            Response response = await MessageHandler.HandleUpdate(update);           
 
             // Echo received message text
             Message sentMessage = await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: response.Answer,
-                replyMarkup: replyMarkup,
+                replyMarkup: response.Markup,
                 //replyMarkup: inlineKeyboard,
                 cancellationToken: cancellationToken);
         }

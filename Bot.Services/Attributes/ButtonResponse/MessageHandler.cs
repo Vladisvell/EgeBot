@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace EgeBot.Bot.Services
 {
+    [AttributeUsage(AttributeTargets.Method)]
     public class MessageHandlerAttribute : Attribute
     {
         public string MyMessageToHandle { get; private set; }
