@@ -1,4 +1,6 @@
+using Amazon.Runtime.Internal.Transform;
 using EgeBot.Bot.Services.Attributes;
+using EgeBot.Bot.Services.Interfaces;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -21,7 +23,9 @@ namespace EgeBot.Bot.Services.Scenarios
     {
         private static Dictionary<string, MethodInfo> commands = new Dictionary<string, MethodInfo> { };
 
-        private static Dictionary<MethodInfo, string?[]> buttonResponses = new Dictionary<MethodInfo, string?[]> { };
+        private static Dictionary<MethodInfo, IReplyMarkup> buttonResponses = new Dictionary<MethodInfo, IReplyMarkup> { };
+
+        private static Dictionary<long, string> lastChatIDMessage = new Dictionary<long, string>();
 
         private ScenarioHandler ScenarioHandler { get; }
 
@@ -63,122 +67,100 @@ namespace EgeBot.Bot.Services.Scenarios
             {
                 var myCommand = (ButtonResponseAttribute)method.GetCustomAttribute(typeof(ButtonResponseAttribute));
                 if (myCommand == null)
-                    buttonResponses.Add(method, null);
+                    buttonResponses.Add(method, new ReplyKeyboardRemove());
                 else
-                    buttonResponses.Add(method, myCommand.Buttons);
+                    buttonResponses.Add(method, myCommand.ButtonResponse.Markup);
             }
             return;
         }
 
-        private ReplyKeyboardMarkup ReplyKeyboardWrapper(string[] answers)
+        private static ResponseCodes IsValidUpdate(Update update)
         {
-            if(answers == null)
-                return null;
+            // Only process Message updates: https://core.telegram.org/bots/api#message
+            if (update.Message is not { } message)
+                return ResponseCodes.InvalidOperation;
+            // Only process text messages
+            if (message.Text is not { } messageText)
+                return ResponseCodes.InvalidOperation;
 
-            var keyboardButtons = answers.Select(x => new KeyboardButton(x));
-            return new ReplyKeyboardMarkup(keyboardButtons)
-            {
-                ResizeKeyboard = true
-            };
+            if (update == null)
+                return ResponseCodes.InvalidOperation;
+
+            if (update.Message == null)
+                return ResponseCodes.InvalidOperation;
+
+            if (update.Message.Text == null)
+                return ResponseCodes.InvalidOperation;
+
+            if (update.Message.Text.Length == 0)
+                return ResponseCodes.InvalidOperation;
+
+            return ResponseCodes.OK;
         }
 
         public async Task<Response> HandleUpdate(Update update)
         {
-            // Only process Message updates: https://core.telegram.org/bots/api#message
-            if (update.Message is not { } message)
-                return await ErrorHandler(update.Message.Chat.Id, ErrorCodes.InvalidOperation);
-            // Only process text messages
-            if (message.Text is not { } messageText)
-                return await ErrorHandler(update.Message.Chat.Id, ErrorCodes.InvalidOperation);
-
             var chatID = update.Message.Chat.Id;
 
-            if (update == null)
-                return await ErrorHandler(chatID, ErrorCodes.InvalidOperation);
+            if(IsValidUpdate(update) != ResponseCodes.OK)
+                return ErrorHandler(chatID, ResponseCodes.InvalidOperation);
 
-            if (update.Message == null)
-                return await ErrorHandler(chatID, ErrorCodes.InvalidOperation);
-
-            if (update.Message.Text == null)
-                return await ErrorHandler(chatID, ErrorCodes.InvalidOperation);
-
-            if (update.Message.Text.Length == 0)
-                return await ErrorHandler(chatID, ErrorCodes.InvalidOperation);
-
-            string textRef = update.Message.Text;
-            bool isCommand = textRef[0] == '/' ? true : false;
+            string messageText = update.Message.Text;
 
             //Parse message accordingly
 
-
             //It's like "/cmd Ah yes this is command" -> ["/cmd", "Ah yes this is command"]
-            var cmdArgs = textRef.Split(' ', 1);
+            var cmdArgs = messageText.Trim().Split(" ", 2);
             if (!commands.ContainsKey(cmdArgs[0]))
-                return await ErrorHandler(chatID, ErrorCodes.InvalidOperation);
+                return ErrorHandler(chatID, ResponseCodes.NotImplemented);
 
-            Response? responsePayload = null;
-           
+            var cmd = cmdArgs[0];
+            var argument = cmdArgs.Length > 1 ? cmdArgs[1] : "";
 
-            if (cmdArgs.Length == 1)
-            {
-                var parameters = new object[] { "", chatID };
-                responsePayload = await (Task<Response>)commands[cmdArgs[0]].Invoke(ScenarioHandler, parameters);
-                responsePayload.Payload = new Payload(ReplyKeyboardWrapper(buttonResponses[commands[cmdArgs[0]]]));
-                return responsePayload;
-            }
+            Response? responsePayload = null;         
 
-            var fullparams = new object[] { cmdArgs[1], chatID };
-            responsePayload = await (Task<Response>)commands[cmdArgs[0]].Invoke(cmdArgs[1], fullparams);
-            responsePayload.Payload = new Payload(ReplyKeyboardWrapper(buttonResponses[commands[cmdArgs[0]]]));
+            var fullparams = new object[] { argument, chatID };
+            responsePayload = await (Task<Response>)commands[cmd].Invoke(ScenarioHandler, fullparams);
+            
+            responsePayload.Markup = buttonResponses[commands[cmd]];
+            
+            lastChatIDMessage[chatID] = responsePayload.Answer;
+            
             return responsePayload;
         }
 
-        private static async Task<Response> ErrorHandler(long ChatId, ErrorCodes code)
+        private static Response ErrorHandler(long ChatId, ResponseCodes code)
         {
             return new Response(code.ToString(), ChatId);
         }
     }
 
-    public enum ErrorCodes
+    public enum ResponseCodes
     {
+        OK,
         NotFound,
         InvalidOperation,
         NotImplemented
-    }
-
-    public struct Payload
-    {
-        public object load { get; set; }
-
-        public Payload(object load)
-        {
-            this.load = load;
-        }
     }
 
     public class Response
     {
         public string Answer { get; set; }
         public long ChatId { get; set; }
-        public Payload Payload { get; set; }
+        public IReplyMarkup Markup { get; set; }
 
-        public Response(string answer, long chatId, Payload payload)
+        public Response(string answer, long chatId, IReplyMarkup markup)
         {
             Answer = answer;
-            ChatId = ChatId;
-            Payload = payload;
+            ChatId = chatId;
+            Markup = markup;
         }
 
         public Response(string answer, long chatId)
         {
             Answer = answer;
-            ChatId = ChatId;
-        }
-
-        public Response(long chatId)
-        {
-            Answer = "Err505";
             ChatId = chatId;
+            Markup = new ReplyKeyboardRemove();
         }
     }
 }

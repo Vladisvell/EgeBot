@@ -22,6 +22,7 @@ namespace EgeBot.Bot
         private string token;
         private s3Storage Storage { get; }
         private MessageHandler MessageHandler { get; }
+        private UpdateType[] validTypes = new UpdateType[] { UpdateType.Message, UpdateType.CallbackQuery };
 
         public Bot(string token, s3Storage storage)
         {
@@ -38,7 +39,8 @@ namespace EgeBot.Bot
             // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
             ReceiverOptions receiverOptions = new()
             {
-                AllowedUpdates = Array.Empty<UpdateType>() // receive all update types except ChatMember related updates
+                //AllowedUpdates = Array.Empty<UpdateType>() // receive all update types except ChatMember related updates
+                AllowedUpdates = validTypes
             };
 
             botClient.StartReceiving(
@@ -54,6 +56,30 @@ namespace EgeBot.Bot
             Console.ReadLine();
             // Send cancellation request to stop bot
             cts.Cancel();
+        }
+
+        Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        {
+            var ErrorMessage = exception switch
+            {
+                ApiRequestException apiRequestException
+                    => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
+                _ => exception.ToString()
+            };
+
+            Console.WriteLine(ErrorMessage);
+            return Task.CompletedTask;
+        }
+
+        private bool isValidUpdateType(Update update)
+        {
+            // Only process Message updates: https://core.telegram.org/bots/api#message
+            if (update.CallbackQuery != null)
+                return true;
+            if (update.Message != null)
+                return true;
+
+            return false;
         }
 
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -73,8 +99,16 @@ namespace EgeBot.Bot
 
 
             // Only process Message updates: https://core.telegram.org/bots/api#message
-            if (update.Message is not { } message)
+            if (!isValidUpdateType(update))
                 return;
+
+            if (update.Type == UpdateType.CallbackQuery)
+            {
+                await botClient.AnswerCallbackQueryAsync(update.CallbackQuery.Id, "That was a callback query.");
+                return; //no support yet
+            }
+
+            var message = update.Message;
 
             var chatId = message.Chat.Id;
 
@@ -82,27 +116,15 @@ namespace EgeBot.Bot
 
             Response response = await MessageHandler.HandleUpdate(update);
 
-            var replyKeyboardMarkup = response.Payload.load == null ? null : (ReplyKeyboardMarkup)response.Payload.load;
+            var replyMarkup = (IReplyMarkup)response.Payload.Markup;
 
             // Echo received message text
             Message sentMessage = await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: response.Answer,
-                replyMarkup: replyKeyboardMarkup == null ? new ReplyKeyboardRemove() : replyKeyboardMarkup,
+                replyMarkup: replyMarkup,
+                //replyMarkup: inlineKeyboard,
                 cancellationToken: cancellationToken);
-        }
-
-        Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
-        {
-            var ErrorMessage = exception switch
-            {
-                ApiRequestException apiRequestException
-                    => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
-                _ => exception.ToString()
-            };
-
-            Console.WriteLine(ErrorMessage);
-            return Task.CompletedTask;
         }
     }
 }

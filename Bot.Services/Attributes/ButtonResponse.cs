@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EgeBot.Bot.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,14 +9,17 @@ namespace EgeBot.Bot.Services.Attributes
 {
     public class ButtonResponseAttribute : Attribute
     {
-        public string?[] Buttons;
- 
-        public ButtonResponseAttribute(params string[] values)
-        {
-            if (values == null || values.Length == 0)
-                Buttons = null;
+        public IButtonResponse ButtonResponse;
 
-            Buttons = values;
+        public ButtonResponseAttribute(Type buttonType, params string[] values)
+        {
+            var replyMarkupType = buttonType.GetInterface("IButtonResponse", true);
+            if (replyMarkupType == null)            
+                throw new ArgumentException(
+                    String.Format("Reply button type was not IButtonResponse! Type given {0}", buttonType.Name)
+                    );            
+
+            ButtonResponse = Activator.CreateInstance(buttonType, values) as IButtonResponse;
         }
 
     }
