@@ -2,6 +2,7 @@ using Amazon.Runtime.Internal.Transform;
 using EgeBot.Bot.Models.db;
 using EgeBot.Bot.Services.Attributes;
 using EgeBot.Bot.Services.Interfaces;
+using EgeBot.Bot.Services.Responses;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,8 @@ namespace EgeBot.Bot.Services.Scenarios
         private static Dictionary<MethodInfo, IReplyMarkup> buttonResponses = new Dictionary<MethodInfo, IReplyMarkup> { };
 
         private static Dictionary<long, string> lastChatIDMessage = new Dictionary<long, string>();
+
+        private static Dictionary<MethodInfo, MethodInfo> callbackMap = new Dictionary<MethodInfo, MethodInfo> { };
 
         private ScenarioHandler ScenarioHandler { get; }
 
@@ -99,7 +102,31 @@ namespace EgeBot.Bot.Services.Scenarios
             return ResponseCodes.OK;
         }
 
-        public async Task<Response> HandleUpdate(Update update)
+        public async Task<Response> HandleCallbackUpdate(Update update)
+        {
+            var chatID = update.CallbackQuery.Message.Chat.Id; //Chat ID where callback was originated from
+            var replyMessageText = update.CallbackQuery.Message?.Text;  //Original response text
+            var originalData = update.CallbackQuery.Data; //Data that was passed to callback
+
+            var cmdArgs = originalData.Trim().Split(" ", 2);
+            if (!commands.ContainsKey(cmdArgs[0]))
+                return ErrorHandler(chatID, ResponseCodes.NotImplemented);
+
+            var argument = cmdArgs.Length > 1 ? cmdArgs[1] : "";
+
+            var cmd = cmdArgs[0];
+
+            Response? responsePayload = null;         
+
+            var fullparams = new object[] { argument, chatID };
+            responsePayload = await (Task<Response>)commands[cmd].Invoke(ScenarioHandler, fullparams);
+            
+            responsePayload.Markup = buttonResponses[commands[cmd]];
+
+            return responsePayload;
+        }
+
+        public async Task<Response> HandleTextUpdate(Update update)
         {
             var chatID = update.Message.Chat.Id;
 
@@ -133,35 +160,6 @@ namespace EgeBot.Bot.Services.Scenarios
         private static Response ErrorHandler(long ChatId, ResponseCodes code)
         {
             return new Response(code.ToString(), ChatId);
-        }
-    }
-
-    public enum ResponseCodes
-    {
-        OK,
-        NotFound,
-        InvalidOperation,
-        NotImplemented
-    }
-
-    public class Response
-    {
-        public string Answer { get; set; }
-        public long ChatId { get; set; }
-        public IReplyMarkup Markup { get; set; }
-
-        public Response(string answer, long chatId, IReplyMarkup markup)
-        {
-            Answer = answer;
-            ChatId = chatId;
-            Markup = markup;
-        }
-
-        public Response(string answer, long chatId)
-        {
-            Answer = answer;
-            ChatId = chatId;
-            Markup = new ReplyKeyboardRemove();
         }
     }
 }

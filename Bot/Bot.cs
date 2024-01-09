@@ -15,6 +15,7 @@ using System.Linq.Expressions;
 using static System.Net.Mime.MediaTypeNames;
 using EgeBot.Bot.Services.Scenarios;
 using EgeBot.Bot.Models.db;
+using EgeBot.Bot.Services.Responses;
 
 namespace EgeBot.Bot
 {
@@ -103,26 +104,25 @@ namespace EgeBot.Bot
             if (!isValidUpdateType(update))
                 return;
 
-            if (update.Type == UpdateType.CallbackQuery)
-            {
-                await botClient.AnswerCallbackQueryAsync(update.CallbackQuery.Id, "That was a callback query.");
-                return; //no support yet
-            }
+            Response response = null;
 
-            var message = update.Message;
+            if (update.Type == UpdateType.CallbackQuery)              
+                response = await MessageHandler.HandleCallbackUpdate(update);
+            
+            if (update.Type == UpdateType.Message)
+                response = await MessageHandler.HandleTextUpdate(update); 
+            
+            if (response == null)
+                return; //No message meant to be sent
 
-            var chatId = message.Chat.Id;
-
-            Console.WriteLine($"Received message in chat {chatId}.");
-
-            Response response = await MessageHandler.HandleUpdate(update);           
+            if(response.Answer == "do_not_send")
+                return;
 
             // Echo received message text
             Message sentMessage = await botClient.SendTextMessageAsync(
-                chatId: chatId,
+                chatId: response.ChatId,
                 text: response.Answer,
                 replyMarkup: response.Markup,
-                //replyMarkup: inlineKeyboard,
                 cancellationToken: cancellationToken);
         }
     }
