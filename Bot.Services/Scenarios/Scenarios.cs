@@ -43,22 +43,21 @@ namespace EgeBot.Bot.Services.Scenarios
         }
 
         [MessageHandler("/help")]
-        [ButtonResponse(typeof(ReplyKeyboard),"Выбрать номер", "Выбрать тему", "Выбрать сложность", "Теория", "Тренеровка", "Выбрать имя", "Статистика")]
+        [ButtonResponse(typeof(ReplyKeyboard),"Выбрать_номер", "Выбрать_тему", "Выбрать_сложность", "Теория", "Тренеровка", "Выбрать_имя", "Статистика")]
         public async Task<Response> Help(string text, long chatId)
         {
             return new Response("ᕦ(ò_óˇ)ᕤ", chatId);
         }
 
-        [MessageHandler("Выбрать сложность")]
-        [ButtonResponse(typeof(CallbackButton),"easy", "medium", "hard")]
+        [MessageHandler("Выбрать_сложность")]
+        [ButtonResponse(typeof(CallbackButton),"easy", "difficulty easy", "medium", "difficulty medium", "hard", "difficulty hard")]
         public async Task<Response> SetSettingComplexity(string text, long chatId)
         {
             //var a = Enum.GetNames(typeof(Complexity));
             return new Response("", chatId);
         }
 
-        [MessageHandler("Выбрать номер")]
-        [ButtonResponse(typeof(CallbackButton),"easy", "medium", "hard")]
+        [MessageHandler("Выбрать_номер")]
         public async Task<Response> SetSettingTaskKim(string text, long chatId)
         {
             //var a = Enum.GetNames(typeof(Complexity));
