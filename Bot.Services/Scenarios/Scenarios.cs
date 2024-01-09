@@ -1,4 +1,5 @@
 ﻿using EgeBot.Bot.Services.Attributes;
+using EgeBot.Bot.Services.ButtonResponses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace EgeBot.Bot.Services.Scenarios
         /// <param name="chatId"></param>
         /// <returns>Response with meow.</returns>
         [MessageHandler("мяу")]
-        [ButtonResponse("мяу", "Вопрос")]
+        [ButtonResponse(typeof(CallbackButton),"мяу", "Вопрос")]
         public async Task<Response> CatReturner(string text, long chatId)
         {
             return new Response("MEOOOOOOOOOOOOOOOOOOOOOOOOOOOOW", chatId);
@@ -31,6 +32,7 @@ namespace EgeBot.Bot.Services.Scenarios
         /// <param name="chatId"></param>
         /// <returns>Response with question</returns>
         [MessageHandler("Вопрос")]
+        [ButtonResponse(typeof(ReplyKeyboard), "мяу")]
         public async Task<Response> Questioner(string text, long chatId)
         {
             return new Response("What is the meaning of life?", chatId);
