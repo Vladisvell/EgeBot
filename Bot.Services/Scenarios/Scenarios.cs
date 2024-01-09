@@ -18,7 +18,7 @@ namespace EgeBot.Bot.Services.Scenarios
         /// <param name="text"></param>
         /// <param name="chatId"></param>
         /// <returns>Response with meow.</returns>
-        [MessageHandler("мяу")]
+        [CommandHandler("мяу")]
         [ButtonResponse(typeof(CallbackButton),"мяу", "Вопрос")]
         public async Task<Response> CatReturner(string text, long chatId)
         {
@@ -31,7 +31,7 @@ namespace EgeBot.Bot.Services.Scenarios
         /// <param name="text"></param>
         /// <param name="chatId"></param>
         /// <returns>Response with question</returns>
-        [MessageHandler("Вопрос")]
+        [CommandHandler("Вопрос")]
         [ButtonResponse(typeof(ReplyKeyboard), "мяу")]
         public async Task<Response> Questioner(string text, long chatId)
         {
@@ -44,7 +44,7 @@ namespace EgeBot.Bot.Services.Scenarios
         /// <param name="text"></param>
         /// <param name="chatId"></param>
         /// <returns></returns>
-        [MessageHandler("Выбрать_Категорию")]
+        [CommandHandler("Выбрать_Категорию")]
         public async Task<Response> SetCategory(string text, long chatId)
         {
             return new Response("What is the meaning of life?", chatId);
@@ -56,13 +56,13 @@ namespace EgeBot.Bot.Services.Scenarios
         /// <param name="text"></param>
         /// <param name="chatId"></param>
         /// <returns></returns>
-        [MessageHandler("Ответ")]
+        [CommandHandler("Ответ")]
         public async Task<Response> Answer(string text, long chatId)
         {
             return new Response(string.Format("Вы ответили: {0}", text), chatId);
         }
 
-        [MessageHandler("Статистика")]
+        [CommandHandler("Статистика")]
         public async Task<Response> GetStats(string text, long chatId)
         {
             return new Response("Вот статистика по заданиям: (Not implemented yet)", chatId);

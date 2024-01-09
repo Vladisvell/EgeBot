@@ -33,7 +33,7 @@ namespace EgeBot.Bot.Services.Scenarios
         public MessageHandler()
         {
             ScenarioHandler = new ScenarioHandler();
-            InitializeCommandWheel(FindAllMethodsWithAttribute(typeof(MessageHandlerAttribute)));
+            InitializeCommandWheel(FindAllMethodsWithAttribute(typeof(CommandHandlerAttribute)));
             InitializeButtonsResponse();
         }
 
@@ -50,7 +50,7 @@ namespace EgeBot.Bot.Services.Scenarios
         {
             foreach (var method in methods)
             {
-                var myCommand = (MessageHandlerAttribute)method.GetCustomAttribute(typeof(MessageHandlerAttribute));
+                var myCommand = (CommandHandlerAttribute)method.GetCustomAttribute(typeof(CommandHandlerAttribute));
                 if (myCommand == null)
                     continue;
                 commands.Add(myCommand.MyMessageToHandle, method);
