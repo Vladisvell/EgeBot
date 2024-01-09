@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EgeBot.Bot.Services
+namespace EgeBot.Bot.Services.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class MessageHandlerAttribute : Attribute
