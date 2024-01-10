@@ -121,7 +121,7 @@ namespace EgeBot.Bot.Services.Scenarios
             var fullparams = new object[] { argument, chatID };
             responsePayload = await (Task<Response>)commands[cmd].Invoke(ScenarioHandler, fullparams);
             
-            responsePayload.Markup = buttonResponses[commands[cmd]];
+            responsePayload.Markup = responsePayload.Markup == null ? buttonResponses[commands[cmd]] : responsePayload.Markup;
 
             return responsePayload;
         }
@@ -150,7 +150,7 @@ namespace EgeBot.Bot.Services.Scenarios
             var fullparams = new object[] { argument, chatID };
             responsePayload = await (Task<Response>)commands[cmd].Invoke(ScenarioHandler, fullparams);
             
-            responsePayload.Markup = buttonResponses[commands[cmd]];
+            responsePayload.Markup = responsePayload.Markup == null ? buttonResponses[commands[cmd]] : responsePayload.Markup;
             
             lastChatIDMessage[chatID] = responsePayload.Answer;
             
