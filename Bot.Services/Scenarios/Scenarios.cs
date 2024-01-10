@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 using EgeBot.Bot.Services.Responses;
+using EgeBot.Bot.Services.ButtonResponses.Generators;
 
 namespace EgeBot.Bot.Services.Scenarios
 {
@@ -62,15 +63,14 @@ namespace EgeBot.Bot.Services.Scenarios
         {
             //var a = Enum.GetNames(typeof(Complexity));
             return new Response("", chatId);
-        }
-
-
+        }               
 
         [MessageHandler("мяу")]
-        [ButtonResponse(typeof(CallbackButton), "мяу", "Вопрос")]
         public async Task<Response> CatReturner(string text, long chatId)
         {
-            return new Response("MEOOOOOOOOOOOOOOOOOOOOOOOOOOOOW", chatId);
+            List<string> strings = new List<string>(){"1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5",};
+            CallbackQueryListGenerator generator = new(strings, "мяу", 3);
+            return new Response("MEOOOOOOOOOOOOOOOOOOOOOOOOOOOOW", chatId, generator.Generate());
         }
 
         /// <summary>
