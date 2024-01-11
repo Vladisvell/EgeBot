@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace EgeBot.Bot.Models
 {
     [Table("topic")]
-    [Microsoft.EntityFrameworkCore.Index(nameof(Title), IsUnique = true)]
+    //[Microsoft.EntityFrameworkCore.Index(nameof(Title), IsUnique = true)]
     public class Topic
     {
         [Key]
