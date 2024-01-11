@@ -78,28 +78,28 @@ namespace EgeBot.Bot.Services.Scenarios
             return;
         }
 
-        private static ResponseCodes IsValidUpdate(Update update)
+        private static ResponseCode IsValidUpdate(Update update)
         {
             // Only process Message updates: https://core.telegram.org/bots/api#message
             if (update.Message is not { } message)
-                return ResponseCodes.InvalidOperation;
+                return ResponseCode.InvalidOperation;
             // Only process text messages
             if (message.Text is not { } messageText)
-                return ResponseCodes.InvalidOperation;
+                return ResponseCode.InvalidOperation;
 
             if (update == null)
-                return ResponseCodes.InvalidOperation;
+                return ResponseCode.InvalidOperation;
 
             if (update.Message == null)
-                return ResponseCodes.InvalidOperation;
+                return ResponseCode.InvalidOperation;
 
             if (update.Message.Text == null)
-                return ResponseCodes.InvalidOperation;
+                return ResponseCode.InvalidOperation;
 
             if (update.Message.Text.Length == 0)
-                return ResponseCodes.InvalidOperation;
+                return ResponseCode.InvalidOperation;
 
-            return ResponseCodes.OK;
+            return ResponseCode.OK;
         }
 
         public async Task<Response> HandleCallbackUpdate(Update update)
@@ -110,7 +110,7 @@ namespace EgeBot.Bot.Services.Scenarios
 
             var cmdArgs = originalData.Trim().Split(" ", 2);
             if (!commands.ContainsKey(cmdArgs[0]))
-                return ErrorHandler(chatID, ResponseCodes.NotImplemented);
+                return ErrorHandler(chatID, ResponseCode.NotImplemented);
 
             var argument = cmdArgs.Length > 1 ? cmdArgs[1] : "";
 
@@ -130,8 +130,8 @@ namespace EgeBot.Bot.Services.Scenarios
         {
             var chatID = update.Message.Chat.Id;
 
-            if(IsValidUpdate(update) != ResponseCodes.OK)
-                return ErrorHandler(chatID, ResponseCodes.InvalidOperation);
+            if(IsValidUpdate(update) != ResponseCode.OK)
+                return ErrorHandler(chatID, ResponseCode.InvalidOperation);
 
             string messageText = update.Message.Text;
 
@@ -140,7 +140,7 @@ namespace EgeBot.Bot.Services.Scenarios
             //It's like "/cmd Ah yes this is command" -> ["/cmd", "Ah yes this is command"]
             var cmdArgs = messageText.Trim().Split(" ", 2);
             if (!commands.ContainsKey(cmdArgs[0]))
-                return ErrorHandler(chatID, ResponseCodes.NotImplemented);
+                return ErrorHandler(chatID, ResponseCode.NotImplemented);
 
             var cmd = cmdArgs[0];
             var argument = cmdArgs.Length > 1 ? cmdArgs[1] : "";
@@ -157,7 +157,7 @@ namespace EgeBot.Bot.Services.Scenarios
             return responsePayload;
         }
 
-        private static Response ErrorHandler(long ChatId, ResponseCodes code)
+        private static Response ErrorHandler(long ChatId, ResponseCode code)
         {
             return new Response(code.ToString(), ChatId);
         }

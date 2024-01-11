@@ -17,7 +17,7 @@ namespace EgeBot.Bot.Models
 
         [Column("type")]
         [Index("IX_TypeUnique", 1,IsUnique = true)]
-        public int Type { get; set; }
+        public required int Type { get; set; }
 
         [Column("title")]
         [MaxLength(100)]

@@ -16,6 +16,7 @@ using static System.Net.Mime.MediaTypeNames;
 using EgeBot.Bot.Services.Scenarios;
 using EgeBot.Bot.Models.db;
 using EgeBot.Bot.Services.Responses;
+using Microsoft.EntityFrameworkCore;
 
 namespace EgeBot.Bot
 {

@@ -17,6 +17,13 @@ namespace EgeBot.Bot.Services.ButtonResponses.Generators
             return markup;
         }
 
+        public CallbackQueryListGenerator(List<string> strings)
+        {
+            var keyboardButtons = strings.Select(x => new[] { InlineKeyboardButton.WithCallbackData(text: x, callbackData: $"{x} {x}") });
+            InlineKeyboardMarkup inlineKeyboard = new(keyboardButtons);
+            markup = inlineKeyboard;
+        }
+
         public CallbackQueryListGenerator(List<string> strings, string command)
         {
             var keyboardButtons = strings.Select(x => new[] { InlineKeyboardButton.WithCallbackData(text: x, callbackData: $"{command} {x}") });
@@ -36,7 +43,7 @@ namespace EgeBot.Bot.Services.ButtonResponses.Generators
                     currlist.Add(InlineKeyboardButton.WithCallbackData(text: strings[i], callbackData: $"{command} {strings[i]}"));
                     counter++;
                 }
-                else
+                if (counter >= maxRowElementsCount)
                 {
                     inlineKeyboardButtons.Add(currlist);
                     currlist = new List<InlineKeyboardButton>();

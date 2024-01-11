@@ -1,6 +1,6 @@
 ﻿namespace EgeBot.Bot.Services.Responses
 {
-    public enum ResponseCodes
+    public enum ResponseCode
     {
         OK,
         NotFound,
