@@ -33,7 +33,7 @@ namespace EgeBot.Bot.Models
         public Topic? SettingTopic { get; set; }
 
         [Column("complexity")]
-        public Complexity? SettingComplexity { get; set; }
+        public Complexity SettingComplexity { get; set; } = Complexity.easy;
 
         public virtual ICollection<UserTask> UserTasks { get; set; }
     }

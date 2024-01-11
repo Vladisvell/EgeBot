@@ -1,4 +1,4 @@
-﻿using EgeBot.Bot.Services.Interfaces;
+﻿using EgeBot.Bot.Services.ButtonResponses.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

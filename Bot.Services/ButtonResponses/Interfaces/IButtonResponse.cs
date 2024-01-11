@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace EgeBot.Bot.Services.Interfaces
+namespace EgeBot.Bot.Services.ButtonResponses.Interfaces
 {
     public interface IButtonResponse
     {
-        IReplyMarkup Markup {get;}
+        IReplyMarkup Markup { get; }
     }
 }

@@ -18,7 +18,7 @@ namespace EgeBot.Bot.Services.ButtonResponses.Generators
 
         public CallbackQueryFromStringsGenerator(List<string> strings, int maxRowElementsCount = 3)
         {
-            if(strings.Count % 2 != 0)
+            if (strings.Count % 2 != 0)
                 throw new ArgumentException("Количество строк во входном списке strings должно быть чётным!");
             List<List<InlineKeyboardButton>> inlineKeyboardButtons = new();
             var counter = 0;
@@ -27,10 +27,10 @@ namespace EgeBot.Bot.Services.ButtonResponses.Generators
             {
                 if (counter < maxRowElementsCount)
                 {
-                    currlist.Add(InlineKeyboardButton.WithCallbackData(text: strings[i], callbackData: $"{strings[i]} {strings[i+1]}"));
+                    currlist.Add(InlineKeyboardButton.WithCallbackData(text: strings[i], callbackData: strings[i + 1]));
                     counter++;
                 }
-                else
+                if (counter >= maxRowElementsCount)
                 {
                     inlineKeyboardButtons.Add(currlist);
                     currlist = new List<InlineKeyboardButton>();
