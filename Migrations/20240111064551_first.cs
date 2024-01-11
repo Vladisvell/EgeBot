@@ -97,7 +97,7 @@ namespace EgeBot.Migrations
                     nick_name = table.Column<string>(type: "text", nullable: false),
                     is_admin = table.Column<bool>(type: "boolean", nullable: false),
                     topicId = table.Column<long>(type: "bigint", nullable: true),
-                    complexity = table.Column<int>(type: "integer", nullable: true)
+                    complexity = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -142,6 +142,12 @@ namespace EgeBot.Migrations
                 column: "TopicId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_task_kim_type",
+                table: "task_kim",
+                column: "type",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_theory_TopicId",
                 table: "theory",
                 column: "TopicId");
@@ -150,6 +156,12 @@ namespace EgeBot.Migrations
                 name: "IX_topic_TaskKimId",
                 table: "topic",
                 column: "TaskKimId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_topic_title",
+                table: "topic",
+                column: "title",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_user_topicId",

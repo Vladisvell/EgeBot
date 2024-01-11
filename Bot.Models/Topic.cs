@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace EgeBot.Bot.Models
 {
     [Table("topic")]
+    [Microsoft.EntityFrameworkCore.Index(nameof(Title), IsUnique = true)]
     public class Topic
     {
         [Key]
@@ -21,7 +22,7 @@ namespace EgeBot.Bot.Models
 
         [Column("title")]
         [MaxLength(100)]
-        [Index("IX_TitleUnique", 1, IsUnique = true)]
+        //[Index("IX_TitleUnique", 1, IsUnique = true)]
         public required string Title { get; set; }
 
         public virtual ICollection<Task> Tasks { get; set; } 

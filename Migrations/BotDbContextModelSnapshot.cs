@@ -80,6 +80,9 @@ namespace EgeBot.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Type")
+                        .IsUnique();
+
                     b.ToTable("task_kim");
                 });
 
@@ -129,6 +132,9 @@ namespace EgeBot.Migrations
 
                     b.HasIndex("TaskKimId");
 
+                    b.HasIndex("Title")
+                        .IsUnique();
+
                     b.ToTable("topic");
                 });
 
@@ -150,7 +156,7 @@ namespace EgeBot.Migrations
                         .HasColumnType("text")
                         .HasColumnName("nick_name");
 
-                    b.Property<int?>("SettingComplexity")
+                    b.Property<int>("SettingComplexity")
                         .HasColumnType("integer")
                         .HasColumnName("complexity");
 
