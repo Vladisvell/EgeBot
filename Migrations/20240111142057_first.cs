@@ -110,7 +110,7 @@ namespace EgeBot.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserTask",
+                name: "user_task",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -121,15 +121,15 @@ namespace EgeBot.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserTask", x => x.id);
+                    table.PrimaryKey("PK_user_task", x => x.id);
                     table.ForeignKey(
-                        name: "FK_UserTask_Task_TaskcId",
+                        name: "FK_user_task_Task_TaskcId",
                         column: x => x.TaskcId,
                         principalTable: "Task",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserTask_user_UserId",
+                        name: "FK_user_task_user_UserId",
                         column: x => x.UserId,
                         principalTable: "user",
                         principalColumn: "id",
@@ -158,24 +158,18 @@ namespace EgeBot.Migrations
                 column: "TaskKimId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_topic_title",
-                table: "topic",
-                column: "title",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_user_topicId",
                 table: "user",
                 column: "topicId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserTask_TaskcId",
-                table: "UserTask",
+                name: "IX_user_task_TaskcId",
+                table: "user_task",
                 column: "TaskcId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserTask_UserId",
-                table: "UserTask",
+                name: "IX_user_task_UserId",
+                table: "user_task",
                 column: "UserId");
         }
 
@@ -186,7 +180,7 @@ namespace EgeBot.Migrations
                 name: "theory");
 
             migrationBuilder.DropTable(
-                name: "UserTask");
+                name: "user_task");
 
             migrationBuilder.DropTable(
                 name: "Task");

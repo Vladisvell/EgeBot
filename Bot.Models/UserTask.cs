@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace EgeBot.Bot.Models
 {
+    [Table("user_task")]
     public class UserTask
     {
         [Key]

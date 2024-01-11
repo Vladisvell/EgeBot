@@ -88,16 +88,18 @@ namespace EgeBot.Bot
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             //загрузка файла. Нужно переместить туда, где ей место. А ещё она файлы на диске создает, но я не знаю как это поправить
-            //var updateHandler = update;
-            //var file = botClient.GetFileAsync(updateHandler.Message.Document.FileId);
-            //var fileName = update.Message.Document.FileName;
-            //var taskNumber = 15;
-            //var subject = "informatics";
-            //using (var saveImageStream = System.IO.File.Open(fileName, FileMode.Create))
+            //if (update.Message.Document != null) 
             //{
-            //    await botClient.DownloadFileAsync(file.Result.FilePath, saveImageStream);
-            //    await Storage.PostFile(fileName, saveImageStream, taskNumber, subject);
-            //    Console.WriteLine("file uploaded");
+            //    var file = botClient.GetFileAsync(update.Message.Document.FileId);
+            //    var fileName = update.Message.Document.FileName;
+            //    var taskNumber = 15;
+            //    var subject = "informatics";
+            //    using (var saveImageStream = System.IO.File.Open(fileName, FileMode.Create))
+            //    {
+            //        await botClient.DownloadFileAsync(file.Result.FilePath, saveImageStream);
+            //        await Storage.PostFile(fileName, saveImageStream, taskNumber, subject);
+            //        Console.WriteLine("file uploaded");
+            //    } 
             //}
 
 
@@ -111,8 +113,8 @@ namespace EgeBot.Bot
                 response = await MessageHandler.HandleCallbackUpdate(update);
             
             if (update.Type == UpdateType.Message)
-                response = await MessageHandler.HandleTextUpdate(update); 
-            
+                response = await MessageHandler.HandleTextUpdate(update);
+
             if (response == null)
                 return; //No message meant to be sent
 

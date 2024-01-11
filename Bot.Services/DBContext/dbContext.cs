@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace EgeBot.Bot.Services.DBContext
 {
@@ -22,13 +23,14 @@ namespace EgeBot.Bot.Services.DBContext
             {
                 ["задание"] = LoadTaskKim,
                 ["тему"] = LoadTopic,
-                ["теорию"] = LoadTheory
+                ["теорию"] = LoadTheory,
+                ["задачу"] = LoadTask
             };
         }
 
         public async Task<User> GetUser(long chat_id)
         {
-            var user = await db.User.FindAsync(chat_id);
+            var user = await db.User.Include(x=> x.UserTasks).Include(x => x.SettingTopic).Where(x => x.Id==chat_id).FirstOrDefaultAsync();
             if (user == null)
             {
                 user = new User { Id = chat_id };
@@ -144,6 +146,22 @@ namespace EgeBot.Bot.Services.DBContext
 
         public async Task<ResponseCode> LoadTask(List<string> data)
         {
+            for (var index = 0; index < data.Count; index += 4)
+            {
+                var i = data[index].Split(' ');
+                var topic = await db.Topic.Where(x => x.TaskKim.Type == int.Parse(i[0]) && x.Title == string.Join(" ", i.Skip(1))).FirstOrDefaultAsync();
+                var complexity = (Complexity)Enum.Parse(typeof(Complexity), data[index+3]);
+                var task = new Models.Task() { Topic = topic, Text = data[index + 1], CorrectAnswer = data[index+2], Complexity = complexity };
+                try
+                {
+                    await db.AddAsync(task);
+                    await db.SaveChangesAsync();
+                }
+                catch
+                {
+                    return ResponseCode.InvalidOperation;
+                }
+            }
             return ResponseCode.OK;
         }
 
@@ -155,6 +173,37 @@ namespace EgeBot.Bot.Services.DBContext
             user.NickName = nickName;
             await db.SaveChangesAsync();
             return ResponseCode.OK;
+        }
+
+        public async Task<ResponseCode> AddTaskToUser(User user,long taskId)
+        {
+            var task = await db.Task.Where(x => x.Id == taskId).FirstOrDefaultAsync();
+            var userTask = new UserTask() { Task = task, User = user, UserAnswer="NOT" };
+            await db.AddAsync(userTask);
+            await db.SaveChangesAsync();
+            return ResponseCode.OK;
+        }
+
+        public async Task<ResponseCode> AddAnswerToUserTask(UserTask userTask, string answer)
+        {
+            userTask.UserAnswer = answer;
+            await db.SaveChangesAsync();
+            return ResponseCode.OK;
+        }
+
+        public async Task<string> GetAnswerByTaskId(long taskId)
+        {
+            var task = await db.Task.Where(x=> x.Id == taskId).FirstOrDefaultAsync();
+            return task.CorrectAnswer;
+        }
+
+        public async Task<Models.Task> GetTaskByUser(User user)
+        {
+            var completedTasks = new List<Models.Task>();
+            if (user.UserTasks != null)
+                completedTasks = user.UserTasks.Select(x => x.Task).ToList();
+            var task = await db.Task.Where(x => x.Topic == user.SettingTopic && x.Complexity==user.SettingComplexity && completedTasks.All(y=> y != x)).FirstOrDefaultAsync();
+            return task;
         }
 
         public async Task<Theory> GetTheoryByUser(User user)

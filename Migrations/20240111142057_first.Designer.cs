@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EgeBot.Migrations
 {
     [DbContext(typeof(BotDbContext))]
-    [Migration("20240111064551_first")]
+    [Migration("20240111142057_first")]
     partial class first
     {
         /// <inheritdoc />
@@ -135,9 +135,6 @@ namespace EgeBot.Migrations
 
                     b.HasIndex("TaskKimId");
 
-                    b.HasIndex("Title")
-                        .IsUnique();
-
                     b.ToTable("topic");
                 });
 
@@ -200,7 +197,7 @@ namespace EgeBot.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserTask");
+                    b.ToTable("user_task");
                 });
 
             modelBuilder.Entity("EgeBot.Bot.Models.Task", b =>

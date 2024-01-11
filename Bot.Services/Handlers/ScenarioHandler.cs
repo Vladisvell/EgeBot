@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using EgeBot.Bot.Services.DBContext;
 using EgeBot.Bot.Services.Responses;
 using EgeBot.Bot.Services.Responses.Enums;
+using Amazon.Runtime;
 
 namespace EgeBot.Bot.Services.Handlers
 {
@@ -47,7 +48,7 @@ namespace EgeBot.Bot.Services.Handlers
         public async Task<Response> Help(string text, long chatId)
         {
             var user = await dbService.GetUser(chatId);
-            var buttons = new List<string>() { "Выбрать номер", "Номер", "Выбрать тему", "Тема", "Получить теорию", "Теория","Тренеровка", "Тренеровка", "Выбрать никнейм", "Никнейм" };
+            var buttons = new List<string>() { "Выбрать номер", "Номер", "Выбрать тему", "Тема", "Выбрать сложность", "Сложность", "Получить теорию", "Теория","Тренировка", "Тренировка", "Выбрать никнейм", "Никнейм" };
             if (user.IsAdmin)
                 buttons.AddRange(new List<string>() { "Загрузить", "Загрузить"});
             CallbackQueryFromStringsGenerator generator = new(buttons, 1);
@@ -139,12 +140,46 @@ namespace EgeBot.Bot.Services.Handlers
             return new Response($"Что-то пошло не так", chatId);
         }
 
-        [MessageHandler("Тренеровка")]
-        public async Task<Response> SetSettingTaskKim(string text, long chatId)
+        [MessageHandler("Тренировка")]
+        public async Task<Response> Practice(string text, long chatId)
         {
-            //var a = Enum.GetNames(typeof(Complexity));
-            return new Response("ddd", chatId);
-        }               
+            var user = await dbService.GetUser(chatId);
+            if (user.SettingTopic == null)
+                return new Response($"{user.NickName}, не торопись. Сначала нужно выбрать номер задания", chatId);
+            var task = await dbService.GetTaskByUser(user);
+            if (task == null)
+                return new Response("Похоже ты решил все задачи по этой теме :D", chatId);
+            var buttons = new List<string>() { "Дать ответ", $"Ответ .{task.Id}", "Получить теорию", "Теория" };
+            CallbackQueryFromStringsGenerator generator = new(buttons, 1);
+            return new Response($"Задача по теме {user.SettingTopic.Title} задания номер {user.SettingTopic.TaskKim.Type}\n{task.Text}", chatId, generator.Generate());
+        }
+
+        //[MessageHandler("Посмотреть")]
+        //public async Task<Response> GetRightAnswer(string text, long chatId)
+        //{
+        //    var user = await dbService.GetUser(chatId);
+        //    var answer = await dbService.GetAnswerByTaskId(long.Parse(text));
+        //    return new Response($"Правильный ответ: {answer}\nНе волнуйся, {user.NickName}, в следующий раз у тебя обязательгл получиться!", chatId);
+        //}
+
+        [MessageHandler("Ответ")]
+        public async Task<Response> Answer(string text, long chatId)
+        {
+            var user = await dbService.GetUser(chatId);
+            if (text[0] == '.')
+            {
+                await dbService.AddTaskToUser(user, long.Parse(text.Substring(1)));
+                return new Response("Для ответа введи:\n Ответ ЗНАЧЕНИЕ", chatId);
+            }
+            var userTask = user.UserTasks.Where(x => x.UserAnswer == "NOT").FirstOrDefault();
+            var answer = await dbService.GetAnswerByTaskId(userTask.Task.Id);
+            await dbService.AddAnswerToUserTask(userTask, text);
+            if (text == answer)
+            {
+                return new Response($"Молодец, {user.NickName}! Это правильный ответ (*≧ω≦*)", chatId);
+            }
+            return new Response($"Правильный ответ: {answer}\nНе волнуйся, {user.NickName}, в следующий раз у тебя обязательгл получиться!", chatId);
+        }
 
         [MessageHandler("Теория")]
         public async Task<Response> GeTheory(string text, long chatId)

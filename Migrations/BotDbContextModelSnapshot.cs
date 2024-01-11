@@ -132,9 +132,6 @@ namespace EgeBot.Migrations
 
                     b.HasIndex("TaskKimId");
 
-                    b.HasIndex("Title")
-                        .IsUnique();
-
                     b.ToTable("topic");
                 });
 
@@ -197,7 +194,7 @@ namespace EgeBot.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserTask");
+                    b.ToTable("user_task");
                 });
 
             modelBuilder.Entity("EgeBot.Bot.Models.Task", b =>

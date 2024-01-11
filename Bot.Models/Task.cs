@@ -29,7 +29,7 @@ namespace EgeBot.Bot.Models
         public required string CorrectAnswer { get; set; }
 
         [Column("complexity")]
-        public Complexity Complexity { get; set; }
+        public required Complexity Complexity { get; set; }
 
         public virtual ICollection<UserTask> UserTasks { get; set; }
     }
