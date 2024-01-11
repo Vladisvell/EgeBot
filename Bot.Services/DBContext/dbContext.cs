@@ -58,6 +58,8 @@ namespace EgeBot.Bot.Services.DBContext
         public async Task<ResponseCode> SetSettingComplexity(long userId, Complexity complexity)
         {
             var user = await db.User.FindAsync(userId);
+            if (user == null)
+                return ResponseCode.NotFound;
             user.SettingComplexity = complexity;
             await db.SaveChangesAsync();
             return ResponseCode.OK;
@@ -88,19 +90,18 @@ namespace EgeBot.Bot.Services.DBContext
             {
                 var i = item.Split(' ');
                 var taskKim = new TaskKim() { Type = int.Parse(i[0]), Title = string.Join(" ", i[1..]) };
-                try
-                {
-                    await db.AddAsync(taskKim); 
-                    await db.SaveChangesAsync();
-                }
-                catch
-                {
-                    return ResponseCode.InvalidOperation;
-                }
+                await db.AddAsync(taskKim);
             }
-            return ResponseCode.OK;
+            try
+            {
+                await db.SaveChangesAsync();
+                return ResponseCode.OK;
+            }
+            catch
+            {
+                return ResponseCode.InvalidOperation;
+            }
         }
-        
 
         public async Task<ResponseCode> LoadTopic(List<string> data)
         {
@@ -109,17 +110,17 @@ namespace EgeBot.Bot.Services.DBContext
                 var i = item.Split(' ');
                 var taskKim = await db.TaskKim.Where(x => x.Type == int.Parse(i[0])).FirstOrDefaultAsync();
                 var topic = new Topic() { TaskKim = taskKim, Title = string.Join(" ", i[1..]) };
-                try
-                {
-                    await db.AddAsync(topic);
-                    await db.SaveChangesAsync();
-                }
-                catch
-                {
-                    return ResponseCode.InvalidOperation;
-                }
+                await db.AddAsync(topic);
             }
-            return ResponseCode.OK;
+            try
+            {
+                await db.SaveChangesAsync();
+                return ResponseCode.OK;
+            }
+            catch
+            {
+                return ResponseCode.InvalidOperation;
+            }
         }
 
         public async Task<ResponseCode> LoadTheory(List<string> data)
@@ -129,22 +130,17 @@ namespace EgeBot.Bot.Services.DBContext
                 var i = data[index].Split(' ');
                 var topic = await db.Topic.Where(x => x.TaskKim.Type == int.Parse(i[0]) && x.Title == string.Join(" ", i.Skip(1))).FirstOrDefaultAsync();
                 var theory = new Theory() { Topic = topic, Text = data[index + 1] };
-                try
-                {
-                    await db.AddAsync(theory);
-                    await db.SaveChangesAsync();
-                }
-                catch
-                {
-                    return ResponseCode.InvalidOperation;
-                }
+                await db.AddAsync(theory);
             }
-            return ResponseCode.OK;
-        }
-
-        public async Task<ResponseCode> LoadTask(List<string> data)
-        {
-            return ResponseCode.OK;
+            try
+            {
+                await db.SaveChangesAsync();
+                return ResponseCode.OK;
+            }
+            catch
+            {
+                return ResponseCode.InvalidOperation;
+            }
         }
 
         public async Task<ResponseCode> ChangeNickName(long userId, string nickName)
