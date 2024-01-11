@@ -13,22 +13,21 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq.Expressions;
 using static System.Net.Mime.MediaTypeNames;
-using EgeBot.Bot.Services.Handlers;
+using EgeBot.Bot.Services.Scenarios;
 using EgeBot.Bot.Models.db;
-using Microsoft.EntityFrameworkCore;
 using EgeBot.Bot.Services.Responses;
-using EgeBot.Bot.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace EgeBot.Bot
 {
     public class Bot
     {
         private string token;
-        private IS3Storage Storage { get; }
+        private s3Storage Storage { get; }
         private MessageHandler MessageHandler { get; }
         private UpdateType[] validTypes = new UpdateType[] { UpdateType.Message, UpdateType.CallbackQuery };
 
-        public Bot(string token, IS3Storage storage, BotDbContext connectionDbString)
+        public Bot(string token, s3Storage storage, BotDbContext connectionDbString)
         {
             this.token = token;
             Storage = storage;
@@ -89,7 +88,8 @@ namespace EgeBot.Bot
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             //загрузка файла. Нужно переместить туда, где ей место. А ещё она файлы на диске создает, но я не знаю как это поправить
-            /*var file = botClient.GetFileAsync(update.Message.Document.FileId);
+            /*var updateHandler = update;
+            var file = botClient.GetFileAsync(updateHandler.Message.Document.FileId);
             var fileName = update.Message.Document.FileName;
             var taskNumber = 15;
             var subject = "informatics";
@@ -100,20 +100,6 @@ namespace EgeBot.Bot
                 Console.WriteLine("file uploaded");
             }*/
 
-            //Пример отправки изображений из облака ботом
-            var filename = "informatics/15/74bbdf28-51b3-4606-bd62-e3faa88a9c1e.png";//это брать из бд
-            using (var responce = await Storage.GetFile(filename))
-            {
-                if (filename.Split('.').Last() == "png")
-                {
-                    var msg1 = await botClient.SendPhotoAsync(update.Message.Chat.Id, new InputFileStream(responce.ResponseStream, filename.Split('/').Last()));
-                }
-                else
-                {
-                    var msg2 = await botClient.SendDocumentAsync(update.Message.Chat.Id, new InputFileStream(responce.ResponseStream, filename.Split('/').Last()));
-                }                    
-            }
-            
 
             // Only process Message updates: https://core.telegram.org/bots/api#message
             if (!isValidUpdateType(update))

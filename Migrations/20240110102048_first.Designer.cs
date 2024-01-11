@@ -12,7 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EgeBot.Migrations
 {
     [DbContext(typeof(BotDbContext))]
+<<<<<<<< HEAD:Migrations/20240111064551_first.Designer.cs
     [Migration("20240111064551_first")]
+========
+    [Migration("20240110102048_first")]
+>>>>>>>> e70467b (data):Migrations/20240110102048_first.Designer.cs
     partial class first
     {
         /// <inheritdoc />
