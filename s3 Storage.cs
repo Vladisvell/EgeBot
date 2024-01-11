@@ -4,14 +4,20 @@ using System.Threading.Tasks;
 using Amazon.S3;
 using Amazon.S3.Model;
 using System.Linq;
+using EgeBot.Bot.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace EgeBot
 {
     public class s3Storage
     {
         private IAmazonS3 S3Client;
-        public s3Storage(string keyID, string secretKey, string endpointURL)
+        public s3Storage(IConfigurationRoot config)
         {
+            var keyID = config.GetConnectionString("KeyID");
+            var secretKey = config.GetConnectionString("SecretKey");
+            var endpointURL = config.GetConnectionString("EndpointURL");
+
             var s3Config = new AmazonS3Config() { ServiceURL = endpointURL };
             this.S3Client = new AmazonS3Client(keyID, secretKey, s3Config);
         }  
@@ -20,7 +26,7 @@ namespace EgeBot
             var guid = Guid.NewGuid().ToString();
             var temp = fileName.Split('.');
             var newFileName = $"{subject}/{taskNumber}/{guid}.{temp.Last()}";
-            var objectRequest = new PutObjectRequest()//Пока подключил облако от другого проекта. Только для теста.
+            var objectRequest = new PutObjectRequest()
             {
                 BucketName = "Egegebot",
                 Key = newFileName,
@@ -31,9 +37,15 @@ namespace EgeBot
             Console.WriteLine(responce.ToString());
         }
 
-        public async Task GetFile(string filename)
+        public async Task<GetObjectResponse> GetFile(string filename)
         {
-            var response = await S3Client.GetObjectAsync("Egegebot", filename);
+            var request = new GetObjectRequest
+            {
+                BucketName = "Egegebot",
+                Key = filename
+            };
+            
+            return await S3Client.GetObjectAsync(request);
         }
     }
 }

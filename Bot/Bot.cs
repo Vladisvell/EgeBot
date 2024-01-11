@@ -88,18 +88,24 @@ namespace EgeBot.Bot
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             //загрузка файла. Нужно переместить туда, где ей место. А ещё она файлы на диске создает, но я не знаю как это поправить
-            //var updateHandler = update;
-            //var file = botClient.GetFileAsync(updateHandler.Message.Document.FileId);
-            //var fileName = update.Message.Document.FileName;
-            //var taskNumber = 15;
-            //var subject = "informatics";
-            //using (var saveImageStream = System.IO.File.Open(fileName, FileMode.Create))
-            //{
-            //    await botClient.DownloadFileAsync(file.Result.FilePath, saveImageStream);
-            //    await Storage.PostFile(fileName, saveImageStream, taskNumber, subject);
-            //    Console.WriteLine("file uploaded");
-            //}
+            /*var file = botClient.GetFileAsync(update.Message.Document.FileId);
+            var fileName = update.Message.Document.FileName;
+            var taskNumber = 15;
+            var subject = "informatics";
+            using (var saveImageStream = System.IO.File.Open(fileName, FileMode.Create))
+            {
+                await botClient.DownloadFileAsync(file.Result.FilePath, saveImageStream);
+                await Storage.PostFile(fileName, saveImageStream, taskNumber, subject);
+                Console.WriteLine("file uploaded");
+            }*/
 
+            //Пример отправки изображений из облака ботом
+            var filename = "informatics/15/74bbdf28-51b3-4606-bd62-e3faa88a9c1e.png";
+            using (var responce = await Storage.GetFile(filename))
+            {
+                var msg = await botClient.SendPhotoAsync(update.Message.Chat.Id, new InputFileStream(responce.ResponseStream, filename.Split('/').Last()));
+            }
+            
 
             // Only process Message updates: https://core.telegram.org/bots/api#message
             if (!isValidUpdateType(update))
