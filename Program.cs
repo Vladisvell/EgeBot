@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using EgeBot.Bot;
 using EgeBot.Bot.Models.db;
+using EgeBot.Bot.Services.Interfaces;
 
 namespace EgeBot
 {
@@ -23,13 +24,9 @@ namespace EgeBot
             var connectionString = config.GetConnectionString("DefaultConnection");
             var tokenString = config.GetConnectionString("BotToken");
 
-            var keyID = config.GetConnectionString("KeyID");
-            var SecretKey = config.GetConnectionString("SecretKey");
-            var endpointURL = config.GetConnectionString("EndpointURL");
-            var storage = new s3Storage(keyID, SecretKey, endpointURL);
+            var storage = new s3Storage(config);
 
             builder.Services.AddDbContext<BotDbContext>(options => options.UseNpgsql(connectionString));
-
             using IHost host = builder.Build();
 
             var a = host.Services.GetService<BotDbContext>();
