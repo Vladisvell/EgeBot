@@ -65,15 +65,17 @@ namespace EgeBot.Bot.Services.Handlers
                 var commands = dbService.loadKeys.Keys.Select(x => $"Загрузить {x}").ToList();
                 return new Response($"Команды:\n{String.Join("\n", commands)}", chatId);
             }
-            await dbService.Load(text);
-            return new Response($"Успех (ﾉ◕ヮ◕)ﾉ*: ･ﾟ✧", chatId);
+            var status = await dbService.Load(text);
+            if (status == ResponseCode.OK)
+                return new Response($"Успех (ﾉ◕ヮ◕)ﾉ*: ･ﾟ✧", chatId);
+            return new Response($"Что-то пошло не так", chatId);
         }
 
         [MessageHandler("Номер")]
         public async Task<Response> ChooseTaskKim(string text, long chatId)
         {
             var tasksKim = await dbService.GetAllTaskKim();
-            if (tasksKim == null)
+            if (tasksKim.Count == 0)
                 return new Response("Пока недоступно :(", chatId);
             if (text.Length == 0)
             {
