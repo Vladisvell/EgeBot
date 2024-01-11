@@ -1,8 +1,9 @@
 using Amazon.Runtime.Internal.Transform;
 using EgeBot.Bot.Models.db;
-using EgeBot.Bot.Services.Attributes;
-using EgeBot.Bot.Services.Interfaces;
+using EgeBot.Bot.Services.ButtonResponses.Interfaces;
+using EgeBot.Bot.Services.Handlers.Attributes;
 using EgeBot.Bot.Services.Responses;
+using EgeBot.Bot.Services.Responses.Enums;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 
-namespace EgeBot.Bot.Services.Scenarios
+namespace EgeBot.Bot.Services.Handlers
 {
     /// <summary>
     /// MessageHandler is a class responsible for handling incoming messages.

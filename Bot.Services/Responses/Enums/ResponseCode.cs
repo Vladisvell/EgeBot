@@ -1,4 +1,4 @@
-﻿namespace EgeBot.Bot.Services.Responses
+﻿namespace EgeBot.Bot.Services.Responses.Enums
 {
     public enum ResponseCode
     {

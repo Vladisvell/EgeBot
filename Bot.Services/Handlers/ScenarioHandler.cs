@@ -1,9 +1,8 @@
-﻿using EgeBot.Bot.Services.Attributes;
-using EgeBot.Bot.Services.ButtonResponses;
+﻿using EgeBot.Bot.Services.ButtonResponses;
 using EgeBot.Bot.Models;
 using EgeBot.Bot.Models.db;
 using EgeBot.Bot.Models.Enums;
-using EgeBot.Bot.Services.Attributes;
+using EgeBot.Bot.Services.Handlers.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,14 +10,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
-using EgeBot.Bot.Services.Responses;
 using EgeBot.Bot.Services.ButtonResponses.Generators;
 using Microsoft.VisualBasic;
 using System.Reflection.Emit;
 using Telegram.Bot.Types;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using EgeBot.Bot.Services.DBContext;
+using EgeBot.Bot.Services.Responses;
+using EgeBot.Bot.Services.Responses.Enums;
 
-namespace EgeBot.Bot.Services.Scenarios
+namespace EgeBot.Bot.Services.Handlers
 {
     public class ScenarioHandler
     {
@@ -29,10 +30,10 @@ namespace EgeBot.Bot.Services.Scenarios
         /// <param name="chatId"></param>
         /// <returns>Response with meow.</returns>
         /// 
-        private readonly DBService dbService;
+        private readonly DBContext.DBContext dbService;
         public ScenarioHandler(BotDbContext connectionDbString)
         {
-            dbService = new DBService(connectionDbString);
+            dbService = new DBContext.DBContext(connectionDbString);
         }
 
         [MessageHandler("/start")]
@@ -61,7 +62,7 @@ namespace EgeBot.Bot.Services.Scenarios
                 return new Response("Нет доступа", chatId);
             if (text.Length == 0)
             {
-                var commands = dbService.keys.Keys.Select(x => $"Загрузить {x}").ToList();
+                var commands = dbService.loadKeys.Keys.Select(x => $"Загрузить {x}").ToList();
                 return new Response($"Команды:\n{String.Join("\n", commands)}", chatId);
             }
             await dbService.Load(text);

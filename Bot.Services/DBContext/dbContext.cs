@@ -1,24 +1,24 @@
 ﻿using EgeBot.Bot.Models;
 using EgeBot.Bot.Models.db;
 using EgeBot.Bot.Models.Enums;
-using EgeBot.Bot.Services.Responses;
+using EgeBot.Bot.Services.Responses.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EgeBot.Bot.Services
+namespace EgeBot.Bot.Services.DBContext
 {
-    public class DBService
+    public class DBContext
     {
         private readonly BotDbContext db;
-        public readonly Dictionary<string, Func<List<string>, Task<ResponseCode>>> keys;
+        public readonly Dictionary<string, Func<List<string>, Task<ResponseCode>>> loadKeys;
 
-        public DBService(BotDbContext db) 
-        { 
+        public DBContext(BotDbContext db)
+        {
             this.db = db;
-            keys = new Dictionary<string, Func<List<string>, Task<ResponseCode>>>()
+            loadKeys = new Dictionary<string, Func<List<string>, Task<ResponseCode>>>()
             {
                 ["задание"] = LoadTaskKim,
                 ["тему"] = LoadTopic,
@@ -31,7 +31,7 @@ namespace EgeBot.Bot.Services
             var user = await db.User.FindAsync(chat_id);
             if (user == null)
             {
-                user = new Models.User { Id = chat_id };
+                user = new User { Id = chat_id };
                 await db.User.AddAsync(user);
                 await db.SaveChangesAsync();
             }
@@ -55,7 +55,7 @@ namespace EgeBot.Bot.Services
             return null;
         }
 
-        public async Task<ResponseCode> SetSettingComplexity(long userId ,Complexity complexity)
+        public async Task<ResponseCode> SetSettingComplexity(long userId, Complexity complexity)
         {
             var user = await db.User.FindAsync(userId);
             if (user == null)
@@ -68,7 +68,7 @@ namespace EgeBot.Bot.Services
         public async Task<ResponseCode> SetSettingTopic(long userId, int taskKimType, int topicPos = 1)
         {
             var user = await db.User.FindAsync(userId);
-            var topics = await db.Topic.Where(x => x.TaskKim.Type== taskKimType).ToListAsync();
+            var topics = await db.Topic.Where(x => x.TaskKim.Type == taskKimType).ToListAsync();
             if (topics == null || user == null)
                 return ResponseCode.NotFound;
             var topic = topics[topicPos - 1];
@@ -80,7 +80,7 @@ namespace EgeBot.Bot.Services
         public async Task<ResponseCode> Load(string text)
         {
             var data = text.Split("\n").ToList();
-            var status = await keys[data[0]](data[1..]);
+            var status = await loadKeys[data[0]](data[1..]);
             return status;
         }
 
@@ -89,7 +89,7 @@ namespace EgeBot.Bot.Services
             foreach (var item in data)
             {
                 var i = item.Split(' ');
-                var taskKim = new TaskKim() { Type = int.Parse(i[0]), Title = string.Join(" ",i[1..]) };
+                var taskKim = new TaskKim() { Type = int.Parse(i[0]), Title = string.Join(" ", i[1..]) };
                 await db.AddAsync(taskKim);
             }
             try
@@ -128,8 +128,8 @@ namespace EgeBot.Bot.Services
             for (var index = 0; index < data.Count; index += 2)
             {
                 var i = data[index].Split(' ');
-                var topic = await db.Topic.Where(x => x.TaskKim.Type == int.Parse(i[0]) && x.Title == String.Join(" ", i.Skip(1))).FirstOrDefaultAsync();
-                var theory = new Theory() { Topic = topic, Text = data[index+1] };
+                var topic = await db.Topic.Where(x => x.TaskKim.Type == int.Parse(i[0]) && x.Title == string.Join(" ", i.Skip(1))).FirstOrDefaultAsync();
+                var theory = new Theory() { Topic = topic, Text = data[index + 1] };
                 await db.AddAsync(theory);
             }
             try

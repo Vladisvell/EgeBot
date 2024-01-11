@@ -1,14 +1,12 @@
-﻿using EgeBot.Bot.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EgeBot.Bot.DI
+namespace EgeBot.Bot.Services.DBContext
 {
-    internal interface IBot
+    internal class Helper
     {
-        
     }
 }
