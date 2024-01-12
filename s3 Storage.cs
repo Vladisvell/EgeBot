@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace EgeBot
 {
-    public class s3Storage
+    public class s3Storage : IS3Storage
     {
         private IAmazonS3 S3Client;
         public s3Storage(IConfigurationRoot config)
@@ -21,6 +21,7 @@ namespace EgeBot
             var s3Config = new AmazonS3Config() { ServiceURL = endpointURL };
             this.S3Client = new AmazonS3Client(keyID, secretKey, s3Config);
         }  
+
         public async Task PostFile(string fileName, Stream fileStream, int taskNumber, string subject)
         {
             var guid = Guid.NewGuid().ToString();
