@@ -17,17 +17,18 @@ using EgeBot.Bot.Services.Handlers;
 using EgeBot.Bot.Models.db;
 using Microsoft.EntityFrameworkCore;
 using EgeBot.Bot.Services.Responses;
+using EgeBot.Bot.Services.Interfaces;
 
 namespace EgeBot.Bot
 {
     public class Bot
     {
         private string token;
-        private s3Storage Storage { get; }
+        private IS3Storage Storage { get; }
         private MessageHandler MessageHandler { get; }
         private UpdateType[] validTypes = new UpdateType[] { UpdateType.Message, UpdateType.CallbackQuery };
 
-        public Bot(string token, s3Storage storage, BotDbContext connectionDbString)
+        public Bot(string token, IS3Storage storage, BotDbContext connectionDbString)
         {
             this.token = token;
             Storage = storage;
@@ -100,10 +101,17 @@ namespace EgeBot.Bot
             }*/
 
             //Пример отправки изображений из облака ботом
-            var filename = "informatics/15/74bbdf28-51b3-4606-bd62-e3faa88a9c1e.png";
+            var filename = "informatics/15/74bbdf28-51b3-4606-bd62-e3faa88a9c1e.png";//это брать из бд
             using (var responce = await Storage.GetFile(filename))
             {
-                var msg = await botClient.SendPhotoAsync(update.Message.Chat.Id, new InputFileStream(responce.ResponseStream, filename.Split('/').Last()));
+                if (filename.Split('.').Last() == "png")
+                {
+                    var msg1 = await botClient.SendPhotoAsync(update.Message.Chat.Id, new InputFileStream(responce.ResponseStream, filename.Split('/').Last()));
+                }
+                else
+                {
+                    var msg2 = await botClient.SendDocumentAsync(update.Message.Chat.Id, new InputFileStream(responce.ResponseStream, filename.Split('/').Last()));
+                }                    
             }
             
 
