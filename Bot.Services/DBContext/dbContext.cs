@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace EgeBot.Bot.Services.DBContext
 {
@@ -30,7 +29,7 @@ namespace EgeBot.Bot.Services.DBContext
 
         public async Task<User> GetUser(long chat_id)
         {
-            var user = await db.User.Include(x=> x.UserTasks).Include(x => x.SettingTopic).Where(x => x.Id==chat_id).FirstOrDefaultAsync();
+            var user = await db.User.FindAsync(chat_id);
             if (user == null)
             {
                 user = new User { Id = chat_id };
@@ -40,7 +39,7 @@ namespace EgeBot.Bot.Services.DBContext
             return user;
         }
 
-        public async Task<List<TaskKim>?> GetAllTaskKim()
+        public async Task<List<TaskKim>> GetAllTaskKim()
         {
             var tasksKim = await db.TaskKim.ToListAsync();
             return tasksKim;
@@ -48,10 +47,7 @@ namespace EgeBot.Bot.Services.DBContext
 
         public async Task<List<Topic>?> GetTopicsByTaskKimId(long taskKimId)
         {
-            var taskKim = await db.TaskKim
-                .Include(x => x.Topics)
-                .Where(x => x.Id == taskKimId)
-                .FirstOrDefaultAsync();
+            var taskKim = await db.TaskKim.FindAsync(taskKimId);
             if (taskKim != null)
                 return taskKim.Topics.ToList();
             return null;
@@ -69,7 +65,7 @@ namespace EgeBot.Bot.Services.DBContext
         {
             var user = await db.User.FindAsync(userId);
             var topics = await db.Topic.Where(x => x.TaskKim.Type == taskKimType).ToListAsync();
-            if (topics == null || user == null)
+            if (topics == null)
                 return ResponseCode.NotFound;
             var topic = topics[topicPos - 1];
             user.SettingTopic = topic;
@@ -109,10 +105,10 @@ namespace EgeBot.Bot.Services.DBContext
             foreach (var item in data)
             {
                 var i = item.Split(' ');
-                var taskKim = await db.TaskKim.Where(x => x.Type == int.Parse(i[0])).FirstOrDefaultAsync();
-                var topic = new Topic() { TaskKim = taskKim, Title = string.Join(" ", i[1..]) };
                 try
                 {
+                    var taskKim = await db.TaskKim.Where(x => x.Type == int.Parse(i[0])).FirstOrDefaultAsync();
+                    var topic = new Topic() { TaskKim = taskKim, Title = string.Join(" ", i[1..]) };
                     await db.AddAsync(topic);
                     await db.SaveChangesAsync();
                 }
@@ -129,10 +125,10 @@ namespace EgeBot.Bot.Services.DBContext
             for (var index = 0; index < data.Count; index += 2)
             {
                 var i = data[index].Split(' ');
-                var topic = await db.Topic.Where(x => x.TaskKim.Type == int.Parse(i[0]) && x.Title == string.Join(" ", i.Skip(1))).FirstOrDefaultAsync();
-                var theory = new Theory() { Topic = topic, Text = data[index + 1] };
                 try
                 {
+                    var topic = await db.Topic.Where(x => x.TaskKim.Type == int.Parse(i[0]) && x.Title == string.Join(" ", i.Skip(1))).FirstOrDefaultAsync();
+                    var theory = new Theory() { Topic = topic, Text = data[index + 1] };
                     await db.AddAsync(theory);
                     await db.SaveChangesAsync();
                 }
@@ -149,11 +145,11 @@ namespace EgeBot.Bot.Services.DBContext
             for (var index = 0; index < data.Count; index += 4)
             {
                 var i = data[index].Split(' ');
-                var topic = await db.Topic.Where(x => x.TaskKim.Type == int.Parse(i[0]) && x.Title == string.Join(" ", i.Skip(1))).FirstOrDefaultAsync();
-                var complexity = (Complexity)Enum.Parse(typeof(Complexity), data[index+3]);
-                var task = new Models.Task() { Topic = topic, Text = data[index + 1], CorrectAnswer = data[index+2], Complexity = complexity };
                 try
                 {
+                    var topic = await db.Topic.Where(x => x.TaskKim.Type == int.Parse(i[0]) && x.Title == string.Join(" ", i.Skip(1))).FirstOrDefaultAsync();
+                    var complexity = (Complexity)Enum.Parse(typeof(Complexity), data[index+2]);
+                    var task = new Models.Task() { Topic = topic, Text = data[index + 1], CorrectAnswer = data[index+3], Complexity = complexity };
                     await db.AddAsync(task);
                     await db.SaveChangesAsync();
                 }
@@ -168,8 +164,6 @@ namespace EgeBot.Bot.Services.DBContext
         public async Task<ResponseCode> ChangeNickName(long userId, string nickName)
         {
             var user = await db.User.FindAsync(userId);
-            if (user == null)
-                return ResponseCode.NotFound;
             user.NickName = nickName;
             await db.SaveChangesAsync();
             return ResponseCode.OK;
@@ -178,7 +172,7 @@ namespace EgeBot.Bot.Services.DBContext
         public async Task<ResponseCode> AddTaskToUser(User user,long taskId)
         {
             var task = await db.Task.Where(x => x.Id == taskId).FirstOrDefaultAsync();
-            var userTask = new UserTask() { Task = task, User = user, UserAnswer="NOT" };
+            var userTask = new UserTask() { Task = task, User = user};
             await db.AddAsync(userTask);
             await db.SaveChangesAsync();
             return ResponseCode.OK;
@@ -191,18 +185,18 @@ namespace EgeBot.Bot.Services.DBContext
             return ResponseCode.OK;
         }
 
-        public async Task<string> GetAnswerByTaskId(long taskId)
-        {
-            var task = await db.Task.Where(x=> x.Id == taskId).FirstOrDefaultAsync();
-            return task.CorrectAnswer;
-        }
+        //public async Task<string> GetAnswerByTaskId(long taskId)
+        //{
+        //    var task = await db.Task.Where(x=> x.Id == taskId).FirstOrDefaultAsync();
+        //    return task.CorrectAnswer;
+        //}
 
         public async Task<Models.Task> GetTaskByUser(User user)
         {
             var completedTasks = new List<Models.Task>();
             if (user.UserTasks != null)
                 completedTasks = user.UserTasks.Select(x => x.Task).ToList();
-            var task = await db.Task.Where(x => x.Topic == user.SettingTopic && x.Complexity==user.SettingComplexity && completedTasks.All(y=> y != x)).FirstOrDefaultAsync();
+            var task = await db.Task.Where(x => x.Topic == user.SettingTopic && x.Complexity==user.SettingComplexity && !completedTasks.Any(y=> y == x)).FirstOrDefaultAsync();
             return task;
         }
 
