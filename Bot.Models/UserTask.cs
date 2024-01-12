@@ -27,6 +27,6 @@ namespace EgeBot.Bot.Models
 
         [Column("user_answer")]
         [MaxLength(100)]
-        public string UserAnswer {  get; set; }
+        public string UserAnswer { get; set; } = "NOT";
     }
 }

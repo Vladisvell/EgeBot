@@ -41,7 +41,7 @@ namespace EgeBot.Bot.Services.Handlers
         public async Task<Response> Start(string text, long chatId)
         {
             var user = await dbService.GetUser(chatId);
-            return new Response($"Приветствую тебя, {user.NickName}! Я твой персональный помощник для подготовки к ЕГЭ по информатике. Для начала советую выбрать номер задания ;)", chatId);
+            return new Response($"Приветствую тебя, {user.NickName}! Я твой персональный помощник для подготовки к ЕГЭ по информатике. Для начала нужно выбрать номер задания ;)", chatId);
         }
 
         [MessageHandler("/help")]
@@ -117,7 +117,7 @@ namespace EgeBot.Bot.Services.Handlers
             if (text.Length == 0)
             {
                 var user = await dbService.GetUser(chatId);
-                return new Response($"Твой никнейм: {user.NickName}\nЧтобы изменить, введи слово Никнейм и название\nПример: Никнейм булочка", chatId);
+                return new Response($"Твой никнейм: {user.NickName}\nЧтобы изменить, введи: Никнейм ИМЯ\nПример: Никнейм булочка", chatId);
             }
             await dbService.ChangeNickName(chatId, text);
             return new Response($"Теперь я буду называть тебя {text} :з", chatId);
@@ -151,7 +151,7 @@ namespace EgeBot.Bot.Services.Handlers
                 return new Response("Похоже ты решил все задачи по этой теме :D", chatId);
             var buttons = new List<string>() { "Дать ответ", $"Ответ .{task.Id}", "Получить теорию", "Теория" };
             CallbackQueryFromStringsGenerator generator = new(buttons, 1);
-            return new Response($"Задача по теме {user.SettingTopic.Title} задания номер {user.SettingTopic.TaskKim.Type}\n{task.Text}", chatId, generator.Generate());
+            return new Response($"Задача по теме '{user.SettingTopic.Title}' задания номер {user.SettingTopic.TaskKim.Type}\n{task.Text}", chatId, generator.Generate());
         }
 
         //[MessageHandler("Посмотреть")]
@@ -169,10 +169,10 @@ namespace EgeBot.Bot.Services.Handlers
             if (text[0] == '.')
             {
                 await dbService.AddTaskToUser(user, long.Parse(text.Substring(1)));
-                return new Response("Для ответа введи:\n Ответ ЗНАЧЕНИЕ", chatId);
+                return new Response("Для ответа введи:\nОтвет ЗНАЧЕНИЕ", chatId);
             }
             var userTask = user.UserTasks.Where(x => x.UserAnswer == "NOT").FirstOrDefault();
-            var answer = await dbService.GetAnswerByTaskId(userTask.Task.Id);
+            var answer = userTask.Task.CorrectAnswer;
             await dbService.AddAnswerToUserTask(userTask, text);
             if (text == answer)
             {
@@ -182,13 +182,13 @@ namespace EgeBot.Bot.Services.Handlers
         }
 
         [MessageHandler("Теория")]
-        public async Task<Response> GeTheory(string text, long chatId)
+        public async Task<Response> GetTheory(string text, long chatId)
         {
             var user = await dbService.GetUser(chatId);
             var theory = await dbService.GetTheoryByUser(user);
             if (theory == null)
                 return new Response("Пока недоступно :(", chatId);
-            return new Response($"Теория по теме {user.SettingTopic.Title} задания номер {user.SettingTopic.TaskKim.Type}\n{theory.Text}", chatId);
+            return new Response($"Теория по теме '{user.SettingTopic.Title}' задания номер {user.SettingTopic.TaskKim.Type}\n{theory.Text}", chatId);
         }
     }
 }

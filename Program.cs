@@ -32,7 +32,7 @@ namespace EgeBot
 
             using IHost host = builder.Build();
 
-            var a = host.Services.GetService<BotDbContext>();
+            var a = new BotDbContext(connectionString);
             var bot = new Bot.Bot(tokenString, storage, a);
             bot.Run();
 
