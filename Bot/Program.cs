@@ -7,6 +7,7 @@ using EgeBot.Bot.Models.db;
 using EgeBot.Bot.Infrastructure;
 using EgeBot.Bot.Services.Interfaces;
 using EgeBot.Bot.Services.Handlers;
+using EgeBot.Bot.Services;
 
 namespace EgeBot.Bot
 {
@@ -26,7 +27,7 @@ namespace EgeBot.Bot
             builder.Services.AddSingleton(config);
             builder.Services.AddSingleton<IS3Storage, s3Storage>();
             builder.Services.AddDbContext<BotDbContext>(options => options.UseLazyLoadingProxies().UseNpgsql(connectionString));
-            builder.Services.AddSingleton<DbContext, DbContext>();
+            builder.Services.AddSingleton<DbContexter, DbContexter>();
             builder.Services.AddSingleton<IScenarioHandler, ScenarioHandler>();
             builder.Services.AddSingleton<IUpdateHandler, UpdateHandler>();
             builder.Services.AddSingleton<IBot, Bot>();

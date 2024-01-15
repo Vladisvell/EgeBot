@@ -6,11 +6,24 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EgeBot.Migrations
 {
     /// <inheritdoc />
-    public partial class first : Migration
+    public partial class First : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Subject",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subject", x => x.id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "task_kim",
                 columns: table => new
@@ -18,11 +31,18 @@ namespace EgeBot.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     type = table.Column<int>(type: "integer", nullable: false),
-                    title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                    title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    SubjectId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_task_kim", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_task_kim_Subject_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Subject",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -46,7 +66,7 @@ namespace EgeBot.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Task",
+                name: "task",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
@@ -59,9 +79,9 @@ namespace EgeBot.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Task", x => x.id);
+                    table.PrimaryKey("PK_task", x => x.id);
                     table.ForeignKey(
-                        name: "FK_Task_topic_TopicId",
+                        name: "FK_task_topic_TopicId",
                         column: x => x.TopicId,
                         principalTable: "topic",
                         principalColumn: "id",
@@ -123,9 +143,9 @@ namespace EgeBot.Migrations
                 {
                     table.PrimaryKey("PK_user_task", x => x.id);
                     table.ForeignKey(
-                        name: "FK_user_task_Task_TaskcId",
+                        name: "FK_user_task_task_TaskcId",
                         column: x => x.TaskcId,
-                        principalTable: "Task",
+                        principalTable: "task",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -137,9 +157,20 @@ namespace EgeBot.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Task_TopicId",
-                table: "Task",
+                name: "IX_Subject_title",
+                table: "Subject",
+                column: "title",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_task_TopicId",
+                table: "task",
                 column: "TopicId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_task_kim_SubjectId",
+                table: "task_kim",
+                column: "SubjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_task_kim_type",
@@ -183,7 +214,7 @@ namespace EgeBot.Migrations
                 name: "user_task");
 
             migrationBuilder.DropTable(
-                name: "Task");
+                name: "task");
 
             migrationBuilder.DropTable(
                 name: "user");
@@ -193,6 +224,9 @@ namespace EgeBot.Migrations
 
             migrationBuilder.DropTable(
                 name: "task_kim");
+
+            migrationBuilder.DropTable(
+                name: "Subject");
         }
     }
 }

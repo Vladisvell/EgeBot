@@ -3,6 +3,7 @@ using System;
 using EgeBot.Bot.Models.db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EgeBot.Migrations
 {
     [DbContext(typeof(BotDbContext))]
-    partial class BotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240115121158_First")]
+    partial class First
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,6 +27,29 @@ namespace EgeBot.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("EgeBot.Bot.Models.Subject", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Title")
+                        .IsUnique();
+
+                    b.ToTable("Subject");
+                });
 
             modelBuilder.Entity("EgeBot.Bot.Models.Task", b =>
                 {
@@ -43,7 +69,7 @@ namespace EgeBot.Migrations
                         .HasColumnType("text")
                         .HasColumnName("correct_answer");
 
-                    b.Property<string>("PathToDownload")
+                    b.Property<string>("FilePath")
                         .HasColumnType("text")
                         .HasColumnName("file_path");
 
@@ -59,7 +85,7 @@ namespace EgeBot.Migrations
 
                     b.HasIndex("TopicId");
 
-                    b.ToTable("Task");
+                    b.ToTable("task");
                 });
 
             modelBuilder.Entity("EgeBot.Bot.Models.TaskKim", b =>
@@ -70,6 +96,9 @@ namespace EgeBot.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("SubjectId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -82,6 +111,8 @@ namespace EgeBot.Migrations
                         .HasColumnName("type");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SubjectId");
 
                     b.HasIndex("Type")
                         .IsUnique();
@@ -211,6 +242,17 @@ namespace EgeBot.Migrations
                     b.Navigation("Topic");
                 });
 
+            modelBuilder.Entity("EgeBot.Bot.Models.TaskKim", b =>
+                {
+                    b.HasOne("EgeBot.Bot.Models.Subject", "Subject")
+                        .WithMany("TasksKim")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Subject");
+                });
+
             modelBuilder.Entity("EgeBot.Bot.Models.Theory", b =>
                 {
                     b.HasOne("EgeBot.Bot.Models.Topic", "Topic")
@@ -259,6 +301,11 @@ namespace EgeBot.Migrations
                     b.Navigation("Task");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EgeBot.Bot.Models.Subject", b =>
+                {
+                    b.Navigation("TasksKim");
                 });
 
             modelBuilder.Entity("EgeBot.Bot.Models.Task", b =>
