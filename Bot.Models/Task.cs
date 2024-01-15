@@ -6,10 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EgeBot.Bot.Models.Enums;
+using EgeBot.Bot.Services.Interfaces;
 
 namespace EgeBot.Bot.Models
 {
-    public class Task
+    public class Task 
     {
         [Key]
         [Column("id")]
@@ -22,8 +23,8 @@ namespace EgeBot.Bot.Models
         [Column("text")]
         public required string Text { get; set; }
 
-        [Column("image")]
-        public byte[]? Image { get; set; }
+        [Column("file_path")]
+        public string? FilePath { get; set; }
 
         [Column("correct_answer")]
         public required string CorrectAnswer { get; set; }

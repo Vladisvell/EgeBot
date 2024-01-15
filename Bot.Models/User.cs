@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Mail;
 using EgeBot.Bot.Models.Enums;
+using EgeBot.Bot.Services.Interfaces;
 
 namespace EgeBot.Bot.Models
 {
