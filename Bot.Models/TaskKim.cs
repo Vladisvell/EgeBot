@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EgeBot.Bot.Services.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,12 +19,15 @@ namespace EgeBot.Bot.Models
         public long Id { get; set; }
 
         [Column("type")]
-        //[Index("IX_TypeUnique", 1,IsUnique = true)]
         public required int Type { get; set; }
 
         [Column("title")]
         [MaxLength(100)]
         public required string Title { get; set; }
+
+        [Column("subject")]
+        [ForeignKey("SubjectId")]
+        public virtual required Subject Subject { get; set; }
 
         public virtual ICollection<Topic> Topics { get; set; }
     }

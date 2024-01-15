@@ -5,11 +5,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EgeBot.Bot.Services.Interfaces;
 
 namespace EgeBot.Bot.Models
 {
     [Table("topic")]
-    [Microsoft.EntityFrameworkCore.Index(nameof(Title), IsUnique = true)]
+    //[Microsoft.EntityFrameworkCore.Index(nameof(Title), IsUnique = true)]
     public class Topic
     {
         [Key]

@@ -6,11 +6,24 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EgeBot.Migrations
 {
     /// <inheritdoc />
-    public partial class first : Migration
+    public partial class First : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Subject",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subject", x => x.id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "task_kim",
                 columns: table => new
@@ -18,11 +31,18 @@ namespace EgeBot.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     type = table.Column<int>(type: "integer", nullable: false),
-                    title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                    title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    SubjectId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_task_kim", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_task_kim_Subject_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Subject",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -46,22 +66,22 @@ namespace EgeBot.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Task",
+                name: "task",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TopicId = table.Column<long>(type: "bigint", nullable: false),
                     text = table.Column<string>(type: "text", nullable: false),
-                    image = table.Column<byte[]>(type: "bytea", nullable: true),
+                    file_path = table.Column<string>(type: "text", nullable: true),
                     correct_answer = table.Column<string>(type: "text", nullable: false),
                     complexity = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Task", x => x.id);
+                    table.PrimaryKey("PK_task", x => x.id);
                     table.ForeignKey(
-                        name: "FK_Task_topic_TopicId",
+                        name: "FK_task_topic_TopicId",
                         column: x => x.TopicId,
                         principalTable: "topic",
                         principalColumn: "id",
@@ -110,36 +130,47 @@ namespace EgeBot.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserTask",
+                name: "user_task",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    ChatId = table.Column<long>(type: "bigint", nullable: false),
                     TaskcId = table.Column<long>(type: "bigint", nullable: false),
                     user_answer = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserTask", x => x.id);
+                    table.PrimaryKey("PK_user_task", x => x.id);
                     table.ForeignKey(
-                        name: "FK_UserTask_Task_TaskcId",
+                        name: "FK_user_task_task_TaskcId",
                         column: x => x.TaskcId,
-                        principalTable: "Task",
+                        principalTable: "task",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserTask_user_UserId",
-                        column: x => x.UserId,
+                        name: "FK_user_task_user_ChatId",
+                        column: x => x.ChatId,
                         principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Task_TopicId",
-                table: "Task",
+                name: "IX_Subject_title",
+                table: "Subject",
+                column: "title",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_task_TopicId",
+                table: "task",
                 column: "TopicId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_task_kim_SubjectId",
+                table: "task_kim",
+                column: "SubjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_task_kim_type",
@@ -158,25 +189,19 @@ namespace EgeBot.Migrations
                 column: "TaskKimId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_topic_title",
-                table: "topic",
-                column: "title",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_user_topicId",
                 table: "user",
                 column: "topicId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserTask_TaskcId",
-                table: "UserTask",
-                column: "TaskcId");
+                name: "IX_user_task_ChatId",
+                table: "user_task",
+                column: "ChatId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserTask_UserId",
-                table: "UserTask",
-                column: "UserId");
+                name: "IX_user_task_TaskcId",
+                table: "user_task",
+                column: "TaskcId");
         }
 
         /// <inheritdoc />
@@ -186,10 +211,10 @@ namespace EgeBot.Migrations
                 name: "theory");
 
             migrationBuilder.DropTable(
-                name: "UserTask");
+                name: "user_task");
 
             migrationBuilder.DropTable(
-                name: "Task");
+                name: "task");
 
             migrationBuilder.DropTable(
                 name: "user");
@@ -199,6 +224,9 @@ namespace EgeBot.Migrations
 
             migrationBuilder.DropTable(
                 name: "task_kim");
+
+            migrationBuilder.DropTable(
+                name: "Subject");
         }
     }
 }

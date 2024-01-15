@@ -1,14 +1,15 @@
 ﻿using System.IO;
-using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using EgeBot.Bot;
 using EgeBot.Bot.Models.db;
+using EgeBot.Bot.Infrastructure;
 using EgeBot.Bot.Services.Interfaces;
+using EgeBot.Bot.Services.Handlers;
+using EgeBot.Bot.Services;
 
-namespace EgeBot
+namespace EgeBot.Bot
 {
     internal class Program
     {
@@ -22,13 +23,18 @@ namespace EgeBot
             var config = configurationBuilder.Build();
 
             var connectionString = config.GetConnectionString("DefaultConnection");
-            var tokenString = config.GetConnectionString("BotToken");
+
             builder.Services.AddSingleton(config);
             builder.Services.AddSingleton<IS3Storage, s3Storage>();
-            builder.Services.AddDbContext<BotDbContext>(options => options.UseNpgsql(connectionString));
+            builder.Services.AddDbContext<BotDbContext>(options => options.UseLazyLoadingProxies().UseNpgsql(connectionString));
+            builder.Services.AddSingleton<DbContexter, DbContexter>();
+            builder.Services.AddSingleton<IScenarioHandler, ScenarioHandler>();
+            builder.Services.AddSingleton<IUpdateHandler, UpdateHandler>();
+            builder.Services.AddSingleton<IBot, Bot>();
+
             using IHost host = builder.Build();
 
-            var bot = new Bot.Bot(tokenString, host.Services.GetService<IS3Storage>(), host.Services.GetService<BotDbContext>());
+            var bot = host.Services.GetService<IBot>();
             bot.Run();
 
             host.Run();

@@ -32,5 +32,7 @@ namespace EgeBot.Bot.Models.db
         public DbSet<Topic> Topic { get; set; }
 
         public DbSet<UserTask> UserTask { get; set; }
+
+        public DbSet<Subject> Subject { get; set; }
     }
 }

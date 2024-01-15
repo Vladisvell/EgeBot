@@ -5,9 +5,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EgeBot.Bot.Services.Interfaces;
 
 namespace EgeBot.Bot.Models
 {
+    [Table("user_task")]
     public class UserTask
     {
         [Key]
@@ -15,7 +17,7 @@ namespace EgeBot.Bot.Models
         public long Id { get; set; }
 
         [Column("user")]
-        [ForeignKey("UserId")]
+        [ForeignKey("ChatId")]
         [Index("IX_UserTask", 1, IsUnique = true)]
         public virtual required User User { get; set; }
 
@@ -26,6 +28,6 @@ namespace EgeBot.Bot.Models
 
         [Column("user_answer")]
         [MaxLength(100)]
-        public string UserAnswer {  get; set; }
+        public string UserAnswer { get; set; } = "NOT";
     }
 }

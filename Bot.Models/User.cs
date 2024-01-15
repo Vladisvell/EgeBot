@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Mail;
 using EgeBot.Bot.Models.Enums;
+using EgeBot.Bot.Services.Interfaces;
 
 namespace EgeBot.Bot.Models
 {
@@ -30,7 +31,7 @@ namespace EgeBot.Bot.Models
         public bool IsAdmin { get; set; } = false; 
 
         [ForeignKey("topicId")]
-        public Topic? SettingTopic { get; set; }
+        public virtual Topic? SettingTopic { get; set; }
 
         [Column("complexity")]
         public Complexity SettingComplexity { get; set; } = Complexity.easy;
