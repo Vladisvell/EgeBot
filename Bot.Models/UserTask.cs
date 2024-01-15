@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EgeBot.Bot.Services.Interfaces;
 
 namespace EgeBot.Bot.Models
 {
@@ -16,7 +17,7 @@ namespace EgeBot.Bot.Models
         public long Id { get; set; }
 
         [Column("user")]
-        [ForeignKey("UserId")]
+        [ForeignKey("ChatId")]
         [Index("IX_UserTask", 1, IsUnique = true)]
         public virtual required User User { get; set; }
 

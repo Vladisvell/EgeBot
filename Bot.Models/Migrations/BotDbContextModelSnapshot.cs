@@ -18,6 +18,9 @@ namespace EgeBot.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true)
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -40,9 +43,9 @@ namespace EgeBot.Migrations
                         .HasColumnType("text")
                         .HasColumnName("correct_answer");
 
-                    b.Property<byte[]>("Image")
-                        .HasColumnType("bytea")
-                        .HasColumnName("image");
+                    b.Property<string>("PathToDownload")
+                        .HasColumnType("text")
+                        .HasColumnName("file_path");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -176,6 +179,9 @@ namespace EgeBot.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<long>("ChatId")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("TaskcId")
                         .HasColumnType("bigint");
 
@@ -185,14 +191,11 @@ namespace EgeBot.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("user_answer");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("TaskcId");
+                    b.HasIndex("ChatId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("TaskcId");
 
                     b.ToTable("user_task");
                 });
@@ -241,15 +244,15 @@ namespace EgeBot.Migrations
 
             modelBuilder.Entity("EgeBot.Bot.Models.UserTask", b =>
                 {
-                    b.HasOne("EgeBot.Bot.Models.Task", "Task")
+                    b.HasOne("EgeBot.Bot.Models.User", "User")
                         .WithMany("UserTasks")
-                        .HasForeignKey("TaskcId")
+                        .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EgeBot.Bot.Models.User", "User")
+                    b.HasOne("EgeBot.Bot.Models.Task", "Task")
                         .WithMany("UserTasks")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("TaskcId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

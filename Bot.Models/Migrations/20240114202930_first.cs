@@ -53,7 +53,7 @@ namespace EgeBot.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TopicId = table.Column<long>(type: "bigint", nullable: false),
                     text = table.Column<string>(type: "text", nullable: false),
-                    image = table.Column<byte[]>(type: "bytea", nullable: true),
+                    file_path = table.Column<string>(type: "text", nullable: true),
                     correct_answer = table.Column<string>(type: "text", nullable: false),
                     complexity = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -115,7 +115,7 @@ namespace EgeBot.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    ChatId = table.Column<long>(type: "bigint", nullable: false),
                     TaskcId = table.Column<long>(type: "bigint", nullable: false),
                     user_answer = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
                 },
@@ -129,8 +129,8 @@ namespace EgeBot.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_user_task_user_UserId",
-                        column: x => x.UserId,
+                        name: "FK_user_task_user_ChatId",
+                        column: x => x.ChatId,
                         principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -163,14 +163,14 @@ namespace EgeBot.Migrations
                 column: "topicId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_user_task_ChatId",
+                table: "user_task",
+                column: "ChatId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_user_task_TaskcId",
                 table: "user_task",
                 column: "TaskcId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_user_task_UserId",
-                table: "user_task",
-                column: "UserId");
         }
 
         /// <inheritdoc />
