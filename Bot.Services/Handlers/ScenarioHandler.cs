@@ -14,11 +14,11 @@ namespace EgeBot.Bot.Services.Handlers
 {
     public class ScenarioHandler : IScenarioHandler
     {
-        private readonly DbContext _context;
+        private readonly DbContexter _context;
         public Dictionary<string, Func<List<string>, Task<HttpStatusCode>>> AdminCommands { get; init; }
         public Dictionary<User, Models.Task> Memory { get; init; }
 
-        public ScenarioHandler(DbContext context)
+        public ScenarioHandler(DbContexter context)
         {
             _context = context;
             Memory = new Dictionary<User, Models.Task>();

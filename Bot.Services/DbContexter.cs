@@ -11,7 +11,7 @@ using System.Net;
 
 namespace EgeBot.Bot.Services
 {
-    public class DbContext(BotDbContext db)
+    public class DbContexter(BotDbContext db)
     {
         private readonly BotDbContext _db = db;
 
@@ -67,12 +67,25 @@ namespace EgeBot.Bot.Services
             return HttpStatusCode.OK;
         }
 
+        public async Task<Subject> GetSubject(string title = "Информатика")
+        {
+            var subject = await db.Subject.Where(x => x.Title == title).FirstOrDefaultAsync();
+            if (subject == null)
+            {
+                subject = new Subject { Title = title };
+                await db.Subject.AddAsync(subject);
+                await db.SaveChangesAsync();
+            }
+            return subject;
+        }
+
         public async Task<HttpStatusCode> LoadTaskKim(List<string> data)
         {
+            var subject = await GetSubject();
             foreach (var item in data)
             {
                 var i = item.Split(' ');
-                var taskKim = new TaskKim() { Type = int.Parse(i[0]), Title = string.Join(" ", i[1..]) };
+                var taskKim = new TaskKim() { Type = int.Parse(i[0]), Title = string.Join(" ", i[1..]), Subject = subject };
                 try
                 {
                     await db.AddAsync(taskKim);

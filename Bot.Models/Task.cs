@@ -10,6 +10,7 @@ using EgeBot.Bot.Services.Interfaces;
 
 namespace EgeBot.Bot.Models
 {
+    [Table("task")]
     public class Task 
     {
         [Key]

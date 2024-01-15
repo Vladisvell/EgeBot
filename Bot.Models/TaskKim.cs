@@ -25,6 +25,10 @@ namespace EgeBot.Bot.Models
         [MaxLength(100)]
         public required string Title { get; set; }
 
+        [Column("subject")]
+        [ForeignKey("SubjectId")]
+        public virtual required Subject Subject { get; set; }
+
         public virtual ICollection<Topic> Topics { get; set; }
     }
 }
