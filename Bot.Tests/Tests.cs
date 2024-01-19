@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DEBUG
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,7 +11,7 @@ using NUnit.Framework;
 using Telegram.Bot;
 
 namespace EgeBot.Bot.Tests
-{
+{    
     [TestFixture]
     public class FrameworkChecks
     {
@@ -69,3 +70,4 @@ namespace EgeBot.Bot.Tests
         //}
     }
 }
+#endif
