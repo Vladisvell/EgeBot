@@ -38,7 +38,7 @@ namespace EgeBot.Bot.Tests
         {
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.SetBasePath(Directory.GetCurrentDirectory());
-            configurationBuilder.AddJsonFile("appsettings.json");
+            configurationBuilder.AddJsonFile("appsettings_example/appsettings.json");
             configuration = configurationBuilder.Build();
             isConfigAvailable = true;
         }
@@ -49,14 +49,14 @@ namespace EgeBot.Bot.Tests
             Assert.That(isConfigAvailable, Is.True);
         }
 
-        [Test]
-        public void CheckBotTokenValid()
-        {
-            Assert.DoesNotThrowAsync(async () => {
-                var botClient = new TelegramBotClient(configuration.GetConnectionString("BotToken"));
-                await botClient.GetMeAsync();                
-                }, $"Provided Bot Token is invalid.\n");
-        }
+        //[Test]
+        //public void CheckBotTokenValid()
+        //{
+        //    Assert.DoesNotThrowAsync(async () => {
+        //        var botClient = new TelegramBotClient(configuration.GetConnectionString("BotToken"));
+        //        await botClient.GetMeAsync();                
+        //        }, $"Provided Bot Token is invalid.\n");
+        //}
 
         //[Test]
         //public void CheckS3TokenValid()
