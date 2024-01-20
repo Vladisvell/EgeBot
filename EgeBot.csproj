@@ -27,16 +27,19 @@
       </PackageReference>
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" Condition="'$(Configuration)' == 'Debug'"/>
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" Condition="'$(Configuration)' == 'Debug'" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
-      <PackageReference Include="NUnit" Version="4.0.1" Condition="'$(Configuration)' == 'Debug'"/>
-      <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" Condition="'$(Configuration)' == 'Debug'"/>
-      <PackageReference Include="NUnitLite" Version="4.0.1" Condition="'$(Configuration)' == 'Debug'"/>
+      <PackageReference Include="NUnit" Version="4.0.1" Condition="'$(Configuration)' == 'Debug'" />
+      <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" Condition="'$(Configuration)' == 'Debug'" />
+      <PackageReference Include="NUnitLite" Version="4.0.1" Condition="'$(Configuration)' == 'Debug'" />
       <PackageReference Include="Telegram.Bot" Version="19.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="appsettings_example\appsettings.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
