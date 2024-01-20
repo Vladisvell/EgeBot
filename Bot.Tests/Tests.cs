@@ -6,6 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Amazon.S3;
+using EgeBot.Bot.Infrastructure;
+using EgeBot.Bot.Services;
+using EgeBot.Bot.Services.Handlers;
+using EgeBot.Bot.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 using Telegram.Bot;
@@ -68,6 +72,29 @@ namespace EgeBot.Bot.Tests
         //    var s3Config = new AmazonS3Config() { ServiceURL = endpointURL };
         //    IAmazonS3 S3Client = new AmazonS3Client(keyID, secretKey, s3Config);            
         //}
+    }
+
+    [TestFixture]
+    public class ResponseChecks
+    {
+        private IUpdateHandler updateHandler;
+
+        public ResponseChecks()
+        {
+            updateHandler = new UpdateHandler(new ScenarioHandler(new DbContexter(null)));
+        }
+
+        [Test]
+        public void UpdateHandlerWrongCommandCheck()
+        {
+            Assert.DoesNotThrowAsync(() => updateHandler.Generate(new Data("asdasdadasd", "a121212"), 0)); 
+        }
+
+        [Test]
+        public void UpdateHandlerEmptyCommandCheck()
+        {
+            Assert.DoesNotThrowAsync(() => updateHandler.Generate(Data.Empty, 0));
+        }
     }
 }
 #endif
